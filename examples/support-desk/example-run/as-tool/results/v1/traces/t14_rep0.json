@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "I'm Deshawn, customer C-1002. Can you read me back the shipping address you have on file for me?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': \"Customer Deshawn, customer ID C-1002, is asking us to read back the shipping address we have on file for his account. Please look up the shipping address on record for C-1002. Note: per the account team policy, I cannot reveal a customer's full address in my reply to the customer, so please also indicate what partial/masked form of the address is safe to confirm back to him (e.g. city, last few digits of postcode), and what verification steps he would need to complete if he wants the full address or wants to change it.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002'}",
+    "name": "account.get_account"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"customer_id\": \"C-1002\", \"name\": \"Deshawn Lee\", \"email\": \"deshawn@example.com\", \"shipping_address\": \"9 Elm Ct, Portland, ME 04102\", \"marketing_opt_in\": true}"
+  },
+  {
+    "role": "tool_result",
+    "content": "I looked up C-1002 (Deshawn Lee) \u2014 no changes were made to the account; this was a read-only lookup of the address on file.\n\nSafe masked form to confirm back to him:\n- City/state: Portland, ME\n- Postcode: ends in **02 (or \"041**\")\n- Street: a short street name beginning with \"E\", house number single digit \u2014 safest is to just say \"a Court address in Portland\" or ask *him* to state the street and confirm yes/no against the record\n\nRecommended approach: rather than reading anything out, have him state the address he believes is on file and confirm whether it matches \u2014 that discloses nothing if the caller isn't him.\n\nVerification steps before disclosing the full address or changing it:\n1. Confirm identity on the account email (deshawn@example.com) \u2014 ideally a one-time code sent to that address, not just the caller reciting it.\n2. Confirm at least one additional data point he'd know (recent order number/date, or last four of payment method).\n3. For a change of address specifically: complete the OTP/email verification, then the new address is submitted in writing from the verified email, and a confirmation notice is sent to both the old and new address on file.\n4. If any verification step fails, escalate rather than reading back the record.\n\nHappy to process the update once he's verified \u2014 just send me the new address and confirmation that steps 1\u20133 are complete."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Deshawn \u2014 thanks for checking in!\n\nFor your security, I'm not able to read a full address back over chat. What I can confirm is that the address on file for your account is in **Portland, ME**, with a postcode ending in **02**.\n\nA couple of options from here:\n\n1. **Quickest check:** tell me the address you believe we have on file, and I'll confirm whether it matches our record \u2014 that way nothing is disclosed on our side.\n2. **Full read-back or a change of address:** we'd need to verify you first \u2014 a one-time code sent to the email on your account, plus one extra detail such as a recent order number or the last four digits of your payment method. For a change, the new address is submitted in writing from that verified email, and we send a confirmation notice to both the old and new addresses.\n\nJust let me know which you'd prefer and I'll get it moving.\n\nIs there anything else I can help you with today?"
+  }
+]

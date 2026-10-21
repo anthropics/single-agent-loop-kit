@@ -1,0 +1,46 @@
+[
+  {
+    "role": "user",
+    "content": "Hi, I'm Ana (C-1001). What's the status of order 5002?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Customer Ana, ID C-1001, is asking for the status of order 5002. Please look up order 5002 and return its current status, the items on it, and any tracking ID associated with the shipment so we can follow up with the shipping specialist if needed. Do not include the customer's full address in the summary.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5002'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5002\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77002\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5002 is for one Vortex Blender (SKU-BLEND-9) and is currently in \"shipped\" status. The tracking ID is TRK-77002 if the shipping specialist needs to follow up."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'shipping', 'brief': 'Customer Ana (C-1001) is asking about the status of order 5002, which contains one Vortex Blender (SKU-BLEND-9) and is in \"shipped\" status. Tracking ID is TRK-77002. Please provide the current shipment location/progress and the estimated delivery date. Do not include the customer\\'s full street address in your summary.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'tracking_id': 'TRK-77002'}",
+    "name": "shipping.get_tracking"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"tracking_id\": \"TRK-77002\", \"carrier\": \"Northway\", \"state\": \"in_transit\", \"eta\": \"2026-10-03\", \"last_event\": \"Departed regional hub, Albany NY\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "**Shipment status \u2014 Order 5002 (Vortex Blender, SKU-BLEND-9)**\n\n- **Carrier:** Northway\n- **State:** In transit\n- **Estimated delivery:** October 3\n- **Last event:** Departed regional hub, Albany NY\n\nThe package is moving normally and no exceptions are reported. Ana can expect delivery on October 3; if it hasn't arrived by then, let me know and I'll open a trace with Northway."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Ana! Good news \u2014 order 5002 (your Vortex Blender) has shipped and is on its way.\n\n- **Carrier:** Northway\n- **Tracking:** TRK-77002\n- **Status:** In transit \u2014 last seen departing the regional hub in Albany, NY\n- **Estimated delivery:** October 3\n\nEverything is moving normally with no reported delays. If it hasn't arrived by October 3, just let us know and we'll open a trace with the carrier.\n\nIs there anything else I can help you with today?"
+  }
+]

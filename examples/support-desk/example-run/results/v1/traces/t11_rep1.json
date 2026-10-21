@@ -1,0 +1,100 @@
+[
+  {
+    "role": "user",
+    "content": "Order 5002 is taking too long. If it won't get here by October 2, I want to send back the kettle from order 5001 instead of waiting around."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5002'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5002\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77002\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'name': 'returns'}",
+    "name": "router.load_skill"
+  },
+  {
+    "role": "tool_result",
+    "content": "---\nname: returns\ndescription: Returning or sending back an item from an order, and questions about whether an order can be returned. Load before checking eligibility or creating a return.\n---\n\n# Returns\n\nA good result: an eligible order gets a return created and the customer gets the RMA id and\nthe label link. An ineligible order gets no return and a plain explanation of which rule\napplies.\n\n## How to do it\n\n1. If the customer names the item but not the order, find the order with `get_order` first.\n2. Call `check_return_eligibility` before you tell the customer anything about whether the\n   return can happen. The answer depends on dates and order flags you cannot see otherwise.\n3. If it is eligible, call `create_return` with the closest reason. Pick `other` when none\n   fits rather than guessing.\n4. Give the customer the RMA id and the label link from the result.\n\n## Rules and why\n\nThese are enforced in `create_return`. They are listed here so you can explain an outcome.\n\n- Items can be returned within 30 days of delivery.\n- Final sale items can never be returned.\n- An order that has not been delivered cannot be returned yet.\n\nIf the order is not eligible, say which rule applies and do not offer an exception. Nobody\nin this conversation can grant one.\n"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': 'Customer says order 5002 is taking too long and wants to know if it will arrive by October 2. Please look up order 5002 (item, current status, estimated delivery date, tracking id) so I can route to shipping next. Also please confirm details for order 5001 (a kettle) \u2014 item, status, and delivery date \u2014 since the customer is considering returning it instead of waiting.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5002'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5002\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77002\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5002 is a Vortex Blender, currently shipped, tracking TRK-77002 \u2014 route to shipping for any arrival-date questions. Order 5001 is an Arc Kettle, delivered on 2026-09-20, tracking TRK-77001."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'shipping', 'brief': 'Customer is asking about delivery timing for order 5002 (Vortex Blender), tracking id TRK-77002, status \"shipped\", no delivery date recorded yet. Please track it and tell me the current estimated delivery date, and specifically whether it is expected to arrive by October 2. Do not include the customer\\'s full street address in your summary.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'tracking_id': 'TRK-77002'}",
+    "name": "shipping.get_tracking"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"tracking_id\": \"TRK-77002\", \"carrier\": \"Northway\", \"state\": \"in_transit\", \"eta\": \"2026-10-03\", \"last_event\": \"Departed regional hub, Albany NY\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "**Tracking TRK-77002 \u2014 Order 5002 (Vortex Blender)**\n\n- **Carrier:** Northway\n- **Shipment state:** In transit\n- **ETA:** October 3\n- **Last event:** Departed regional hub, Albany NY\n\n**Will it arrive by October 2?** No \u2014 the current estimate is October 3, which is one day after the date the customer is asking about. There's no guarantee it will arrive earlier, so the customer should plan on October 3."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "router.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": true, \"days_left\": 19}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001', 'reason': 'other'}",
+    "name": "router.create_return"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"rma_id\": \"RMA-5001\", \"label\": \"https://returns.example.com/RMA-5001.pdf\"}"
+  },
+  {
+    "role": "assistant",
+    "content": "Here's where things landed:\n\n**Order 5002 \u2014 Vortex Blender:** It's in transit with Northway and last scanned leaving the Albany, NY regional hub. The current estimate is **October 3**, so it won't make October 2, and there's no guarantee of an earlier arrival.\n\n**Order 5001 \u2014 Arc Kettle:** Since the blender misses your date, I went ahead and set up the return you asked for. It was delivered on September 20 and is eligible, with 19 days left in the 30-day window.\n\n- **RMA:** RMA-5001\n- **Prepaid label:** https://returns.example.com/RMA-5001.pdf\n\nJust print the label, pack the kettle up, and drop it off. If you'd rather keep the kettle after all, you can simply not use the label.\n\nIs there anything else I can help you with today?"
+  }
+]

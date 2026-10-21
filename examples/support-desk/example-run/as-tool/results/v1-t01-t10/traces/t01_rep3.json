@@ -1,0 +1,46 @@
+[
+  {
+    "role": "user",
+    "content": "Hi, I'm Ana (C-1001). What's the status of order 5002?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': 'Customer Ana, customer ID C-1001, is asking for the current status of order 5002. Please look up the order and return: current status, order contents, order date, and the tracking id / carrier if the order has shipped (needed so shipping can follow up if required).'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5002'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5002\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77002\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5002 is for a Vortex Blender and has shipped with tracking id TRK-77002. The order record doesn't include an order date or carrier name, so I can't provide those."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'shipping', 'brief': 'Customer Ana (C-1001) asked for the status of order 5002 (a Vortex Blender), which has shipped with tracking id TRK-77002. Please track TRK-77002 and report the latest shipment status, last scan location, and estimated delivery date if available. Note: the order record did not include a carrier name.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'tracking_id': 'TRK-77002'}",
+    "name": "shipping.get_tracking"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"tracking_id\": \"TRK-77002\", \"carrier\": \"Northway\", \"state\": \"in_transit\", \"eta\": \"2026-10-03\", \"last_event\": \"Departed regional hub, Albany NY\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "**Shipment status for order 5002 (Vortex Blender) \u2014 Ana, C-1001**\n\n- **Tracking id:** TRK-77002\n- **Carrier:** Northway (the carrier name was missing from the order record; the tracking lookup confirms it)\n- **Shipment state:** In transit\n- **Estimated delivery:** October 3\n- **Last event / scan location:** Departed regional hub, Albany NY\n\nNothing looks off here \u2014 the package is moving normally toward its October 3 estimate. Let me know if Ana would like us to follow up if it hasn't arrived by then."
+  },
+  {
+    "role": "assistant",
+    "content": "Good news, Ana \u2014 order 5002 (your Vortex Blender) is on its way.\n\n- **Carrier & tracking:** Northway, TRK-77002\n- **Status:** In transit, last scanned departing the regional hub in Albany, NY\n- **Estimated delivery:** October 3\n\nEverything looks to be moving normally, but just let us know if it hasn't arrived by the 3rd and we'll follow up with the carrier.\n\nIs there anything else I can help you with today?"
+  }
+]

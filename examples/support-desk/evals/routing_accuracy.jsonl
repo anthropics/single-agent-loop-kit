@@ -1,0 +1,8 @@
+{"input": "What's the status of order 5002?", "expected_first_route": "orders"}
+{"input": "Where is my blender?", "expected_first_route": "orders"}
+{"input": "I want to return the kettle from order 5001.", "expected_first_route": "returns"}
+{"input": "Can I send back the filter pack?", "expected_first_route": "returns"}
+{"input": "Change my shipping address please.", "expected_first_route": "account"}
+{"input": "Stop sending me marketing emails.", "expected_first_route": "account"}
+{"input": "My vacuum keeps blinking red.", "expected_first_route": "diagnostics"}
+{"input": "My oven arrived with a cracked door.", "expected_first_route": "claims"}

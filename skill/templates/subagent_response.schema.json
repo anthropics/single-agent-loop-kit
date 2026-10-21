@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SubagentResponse",
+  "description": "What every subagent called as a tool hands back to the main agent. UI events travel on a separate channel.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["conclusion", "evidence", "actions_taken", "confidence", "caveats"],
+  "properties": {
+    "conclusion": {
+      "type": "string",
+      "description": "The answer to the brief, in a few sentences the main agent can act on."
+    },
+    "evidence": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "The data the conclusion rests on: ids, values, counts. Specific enough for the main agent to check."
+    },
+    "actions_taken": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Anything the subagent changed. Empty if it only read."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "caveats": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "What it could not check, or what would change the conclusion."
+    }
+  }
+}

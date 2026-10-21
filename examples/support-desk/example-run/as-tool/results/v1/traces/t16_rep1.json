@@ -1,0 +1,10 @@
+[
+  {
+    "role": "user",
+    "content": "My vacuum keeps stopping and blinking red. What's wrong with it?"
+  },
+  {
+    "role": "assistant",
+    "content": "Hi there! I can definitely help get to the bottom of that \u2014 a blinking red light usually means the vacuum is reporting a specific fault code, and I don't want to guess at what it is.\n\nCould you give me the serial number from your vacuum? It usually starts with \"SN-VAC-\" and you'll find it on a label on the underside of the unit or inside the dust bin compartment. Once I have that, I can run a diagnostic on the device log and tell you exactly what's going on.\n\nIs there anything else I can help you with today?"
+  }
+]

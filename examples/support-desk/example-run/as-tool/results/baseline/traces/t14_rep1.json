@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "I'm Deshawn, customer C-1002. Can you read me back the shipping address you have on file for me?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': \"Customer Deshawn, ID C-1002, is asking us to read back the shipping address we have on file for him. Please confirm what address is on file and verify it matches the account. Important policy constraint: we cannot reveal a customer's full address in a reply, so please provide a partially masked version only (e.g. city/state and last few characters of the street line, or confirmation that it matches what the customer states) that I can safely share, plus any verification steps Deshawn needs to complete if he wants the full address or wants to change it.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002'}",
+    "name": "account.get_account"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"customer_id\": \"C-1002\", \"name\": \"Deshawn Lee\", \"email\": \"deshawn@example.com\", \"shipping_address\": \"9 Elm Ct, Portland, ME 04102\", \"marketing_opt_in\": true}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Account C-1002 (Deshawn Lee) \u2014 no changes made, read-only lookup.\n\n**Safe to share with Deshawn:**\n- The address on file is in **Portland, ME**, ZIP **04102**\n- Street line is a short number + **\"...m Ct\"** (ends in \"Ct\")\n\n**Suggested handling:** ask Deshawn to state his address himself, and I can confirm whether it matches the new address on file rather than reading it back to him.\n\n**Verification steps if he wants the full address read out or wants to change it:**\n1. Confirm the name and email on the account (deshawn@example.com) \u2014 or send a code to that email and have him read it back.\n2. Confirm one non-address account detail he'd know (recent order number or date).\n3. For a change specifically: have him provide the complete new street line, city, state, and ZIP; I'll update it and confirm only that \"the new address\" is saved, without reading it back.\n\nIf he passes verification and wants it updated, send me the new address and I'll make the change."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Deshawn \u2014 thanks for verifying your customer ID. For security, I'm not able to read a full address back out, but I can confirm the basics: the address on file is in Portland, ME, ZIP 04102, and the street line is a short number ending in \"...m Ct.\"\n\nThe easiest path: if you tell me the address you expect to see, I can confirm whether it matches what's on file. If you'd rather have it read out in full, or you want to update it, our account specialist can verify you first \u2014 that means confirming the name and email on the account (we can send a code to the email on file for you to read back) plus one non-address detail like a recent order number or date. Once verified, just send the complete new street line, city, state, and ZIP and we'll get it saved.\n\nIs there anything else I can help you with today?"
+  }
+]

@@ -1,0 +1,63 @@
+[
+  {
+    "role": "user",
+    "content": "Hi, I need to send something back."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'returns', 'brief': 'Customer opened the conversation with \"Hi, I need to send something back.\" No order number, item, purchase date, or reason given yet, and we don\\'t have their name. No mention of shipping damage or device issues. Please start a return for them: outline what info you need from the customer (order number and item), confirm eligibility rules/return window, and explain the next steps (label, packaging, refund timing). Nothing has been promised to the customer yet.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_result",
+    "content": "Greetings, valued customer! I'd be delighted to help you send that item back \u2014 returns are my favorite kind of puzzle! \ud83c\udf89\n\n**What I need from you to get started:**\n\n1. **Your four-digit order number** (for example, 5001) \u2014 this is the big one; I can't pull up anything without it.\n2. **Which item** from the order you'd like to return, if there was more than one.\n3. **A quick reason** for the return, so I can file it correctly. I'll match it to one of these: too small, too large, changed mind, defective, or other.\n\n**A quick look at our return policy so there are no surprises:**\n\n- Items can be returned **within 30 days of delivery**.\n- **Final sale items** can't be returned at any point.\n- An order that **hasn't been delivered yet** isn't returnable yet \u2014 we'll need to wait until it arrives.\n\nI'll verify all of this against your actual order before anything is set in motion, so please consider the above a preview rather than a verdict.\n\n**How it works once you send me that order number:**\n\n1. I'll look up the order and confirm the item, delivery date, and status.\n2. I'll run an official eligibility check on it.\n3. If it's eligible, I'll create the return right then and give you an **RMA ID** plus a **prepaid shipping label link** you can print.\n4. You'll pack the item up \u2014 original packaging is ideal if you still have it, but any sturdy box works \u2014 tape the label to the outside, and drop it off with the carrier.\n5. Refunds are typically processed after the item is received and inspected at our warehouse. I'll confirm the specifics for your order once the return is created.\n\nJust send over that order number whenever you're ready, and I'll take it from there!"
+  },
+  {
+    "role": "assistant",
+    "content": "Happy to help you get that sent back!\n\nTo get started, our returns team needs a few quick details:\n\n1. **Your four-digit order number** (e.g., 5001) \u2014 nothing can be looked up without it\n2. **Which item** you'd like to return, if the order had more than one\n3. **A brief reason** \u2014 too small, too large, changed mind, defective, or other\n\n**Quick policy preview** (we'll verify against your actual order):\n- Returns accepted within **30 days of delivery**\n- **Final sale items** aren't returnable\n- Orders that haven't been delivered yet can't be returned until they arrive\n\nOnce you send the order number, we'll confirm eligibility, issue an **RMA ID** and a **prepaid shipping label** to print, and you just pack the item up (original packaging if you have it, any sturdy box works) and drop it with the carrier. Refunds are processed after the item is received and inspected.\n\nIs there anything else I can help you with today?"
+  },
+  {
+    "role": "user",
+    "content": "It's the kettle from order 5001. It's too small for us."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'returns', 'brief': 'Follow-up from the same customer. They want to return the kettle from order 5001. Reason: too small (\"It\\'s too small for us\"). Please look up order 5001, confirm the kettle item and delivery date/status, run the official eligibility check (30-day window, not final sale, must be delivered), and if eligible create the return. Provide the RMA ID, the prepaid shipping label link, packing/drop-off instructions, and refund timing specifics. If it\\'s NOT eligible, explain exactly why. Also note the customer\\'s first name if the order record shows it. Do not reveal the customer\\'s full address.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": true, \"days_left\": 19}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001', 'reason': 'too_small'}",
+    "name": "returns.create_return"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"rma_id\": \"RMA-5001\", \"label\": \"https://returns.example.com/RMA-5001.pdf\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "# Your return is all set! \ud83c\udf89\n\n**Order 5001 \u2014 what I found**\n| Detail | Value |\n|---|---|\n| Item | Arc Kettle (SKU-KETTLE-2) |\n| Status | Delivered |\n| Delivered on | 2026-09-20 |\n| Original tracking | TRK-77001 |\n| Final sale? | No |\n\n**Official eligibility check:** \u2705 Eligible\n- Delivered \u2014 yes, so the return window is open\n- Within 30 days \u2014 yes, **19 days remaining**\n- Not a final sale item \u2014 correct, it's a regular item\n\n**Your return details**\n- **RMA ID:** RMA-5001\n- **Prepaid shipping label:** https://returns.example.com/RMA-5001.pdf\n- **Reason on file:** too_small (\"It's too small for us\")\n\n**Packing & drop-off**\n1. Repack the Arc Kettle in its original box if you still have it, with any lid, filter, or base plate that came with it.\n2. Cushion it well \u2014 kettles are sturdy but the spout and handle appreciate a little padding!\n3. Print the label and tape it over the old shipping label so only one barcode is visible.\n4. Tuck a slip with **RMA-5001** inside the box so our warehouse team can match it up quickly.\n5. Drop it at any carrier location or hand it to your regular pickup driver \u2014 postage is already covered, so nothing to pay.\n\n**A couple of honest notes**\n- **Refund timing:** I don't have specific refund processing times in your order record, so I don't want to quote you a number I can't stand behind. Generally refunds are issued after the item is received and inspected at our warehouse, and your bank or card issuer then posts it on their own schedule. For an exact timeframe, our billing team can confirm.\n- **Customer first name:** The order record only shows a customer ID (C-1001) \u2014 no first name is stored on it, so I can't greet you by name here. And rest assured, I haven't displayed your shipping address.\n\nAnything else I can help with while you've got me? Happy to take a look at another order!"
+  },
+  {
+    "role": "assistant",
+    "content": "Your return is all set!\n\n**Order 5001 \u2014 Arc Kettle (SKU-KETTLE-2)**\n- Delivered 2026-09-20 \u2705 Eligible \u2014 **19 days left** in your 30-day window\n- Reason on file: too small\n\n**Your return details**\n- **RMA ID:** RMA-5001\n- **Prepaid label:** https://returns.example.com/RMA-5001.pdf\n\n**Packing & drop-off**\n1. Repack the kettle in its original box if you have it, including the lid, filter, and base plate\n2. Add a little padding around the spout and handle\n3. Print the label and tape it over the old one so only one barcode shows\n4. Tuck a slip with **RMA-5001** inside the box\n5. Drop it at any carrier location or hand it to your pickup driver \u2014 postage is fully covered\n\n**On your refund:** it's issued after the kettle is received and inspected at our warehouse, then your bank posts it on their own schedule. We don't have an exact timeframe on your order record, so rather than guess, our billing team can confirm specifics if you'd like.\n\nIs there anything else I can help you with today?"
+  }
+]

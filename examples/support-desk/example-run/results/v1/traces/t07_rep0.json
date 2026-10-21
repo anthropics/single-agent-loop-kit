@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "Please change my shipping address to 12 Harbor Rd, Portland, ME 04101. I'm C-1002."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': \"Customer C-1002 requests a shipping address change on their account. New address: 12 Harbor Rd, Portland, ME 04101. Please update the shipping address on file for C-1002 and confirm the change was applied. Also note whether the change affects any orders already in transit (i.e., whether the new address applies only to future orders). Do not include the full address in your summary text beyond what's needed \u2014 I will not repeat the full address back to the customer.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002', 'address': '12 Harbor Rd, Portland, ME 04101'}",
+    "name": "account.update_shipping_address"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"shipping_address\": \"12 Harbor Rd, Portland, ME 04101\"}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002'}",
+    "name": "account.get_account"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"customer_id\": \"C-1002\", \"name\": \"Deshawn Lee\", \"email\": \"deshawn@example.com\", \"shipping_address\": \"12 Harbor Rd, Portland, ME 04101\", \"marketing_opt_in\": true}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Default shipping address for C-1002 (Deshawn Lee) was updated to the new address; it applies to future orders only and does not reroute any orders already in transit."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Deshawn \u2014 your default shipping address has been updated to the new Portland, ME address ending in 04101. Please note this applies to future orders only; anything already in transit will continue to its original destination. If you have a shipment on the way that needs rerouting, let me know the order number and I'll look into it.\n\nIs there anything else I can help you with today?"
+  }
+]

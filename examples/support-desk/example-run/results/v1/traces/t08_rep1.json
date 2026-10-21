@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Stop sending me marketing emails. Customer C-1003."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': \"Customer C-1003 wants to be unsubscribed from all marketing emails. Please opt them out of marketing/promotional email communications on their account. Keep transactional emails (order confirmations, shipping notices) active unless they've asked otherwise. Confirm back what was changed and whether anything else is needed from the customer (e.g., confirmation link, processing delay before emails stop).\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1003', 'opt_in': False}",
+    "name": "account.set_marketing_opt_in"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"marketing_opt_in\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Marketing email is now off for C-1003; transactional emails (order confirmations, shipping notices) remain active, and no confirmation link or further action is needed from the customer \u2014 though in-flight campaigns may take a short time to stop."
+  },
+  {
+    "role": "assistant",
+    "content": "You're all set \u2014 marketing emails are now turned off for your account. You'll still get transactional messages like order confirmations and shipping notices, and no confirmation step is needed on your end. A few already-queued campaigns may trickle in briefly before they stop completely.\n\nIs there anything else I can help you with today?"
+  }
+]

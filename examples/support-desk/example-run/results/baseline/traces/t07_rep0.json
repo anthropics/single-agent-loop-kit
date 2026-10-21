@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "Please change my shipping address to 12 Harbor Rd, Portland, ME 04101. I'm C-1002."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': \"Customer ID C-1002 requests a change to their shipping address on file. New address provided by customer: 12 Harbor Rd, Portland, ME 04101. Please update the shipping address on the account and confirm the change was applied, including the effective date and whether it affects any orders already in progress. Note: per account team policy, do not include the full address in the customer-facing summary \u2014 a partial confirmation (e.g., street name and city/ZIP) is fine. Also please confirm the customer's first name if available so the reply can be personalized.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002', 'address': '12 Harbor Rd, Portland, ME 04101'}",
+    "name": "account.update_shipping_address"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"shipping_address\": \"12 Harbor Rd, Portland, ME 04101\"}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002'}",
+    "name": "account.get_account"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"customer_id\": \"C-1002\", \"name\": \"Deshawn Lee\", \"email\": \"deshawn@example.com\", \"shipping_address\": \"12 Harbor Rd, Portland, ME 04101\", \"marketing_opt_in\": true}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Deshawn's default shipping address for C-1002 is now the new address, effective immediately; I can't see any in-progress orders from the account record, so that would need to be checked in the order system.\n\nOne note: I kept the address out of the summary entirely rather than including a partial, since my operating rules prohibit echoing shipping addresses back in any form."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Deshawn \u2014 your default shipping address has been updated, effective immediately. For privacy, I won't repeat the address back here, but the new one you provided is now on file.\n\nOne thing to note: your account record doesn't show whether you have any orders already in progress, so this change may not apply to anything that's already been processed. If you'd like, I can have our orders team check on any active orders and see whether they can still be redirected.\n\nIs there anything else I can help you with today?"
+  }
+]

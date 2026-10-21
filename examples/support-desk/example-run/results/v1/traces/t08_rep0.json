@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Stop sending me marketing emails. Customer C-1003."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': 'Customer C-1003 has requested to be unsubscribed from all marketing emails. Please opt them out of marketing email communications on their account and confirm the change. Note: transactional emails (order confirmations, shipping updates) should remain active unless the customer says otherwise. Please confirm what was changed and when it takes effect.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1003', 'opt_in': False}",
+    "name": "account.set_marketing_opt_in"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"marketing_opt_in\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Marketing emails are now turned off for C-1003, effective immediately; transactional emails (order and shipping notices) remain active."
+  },
+  {
+    "role": "assistant",
+    "content": "Done \u2014 marketing emails are now turned off for your account, effective immediately. You'll still get order confirmations and shipping updates, since those are tied to your purchases, but no more promotional messages.\n\nIs there anything else I can help you with today?"
+  }
+]

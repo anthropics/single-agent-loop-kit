@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Stop sending me marketing emails. Customer C-1003."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': \"Customer C-1003 wants to be unsubscribed from all marketing emails. Please action the opt-out on their account (marketing email preferences set to off) and confirm it's done, plus note how long it may take to take effect and confirm that transactional/order-related emails will still be sent. No other changes requested.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1003', 'opt_in': False}",
+    "name": "account.set_marketing_opt_in"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"marketing_opt_in\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Marketing emails are now turned off for C-1003 \u2014 this can take up to 24\u201348 hours to fully take effect, and transactional/order-related emails will still be sent."
+  },
+  {
+    "role": "assistant",
+    "content": "Done \u2014 marketing emails are now switched off for your account (C-1003). It can take 24\u201348 hours to fully take effect, so you may see one or two more in the meantime. You'll still receive transactional emails about your orders, like confirmations and delivery updates.\n\nIs there anything else I can help you with today?"
+  }
+]

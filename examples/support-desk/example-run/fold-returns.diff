@@ -1,0 +1,282 @@
+# The returns fold from the example run, as two commits.
+# Made against the kit as it was on 2026-10-08. Commit ids, author and dates are left out.
+
+# Commit 1: Fold the returns subagent into the main support agent
+# The router now handles returns itself with a returns skill loaded on demand and the order, eligibility and create-return tools, instead of delegating to a separate returns agent.
+# create_return now refuses ineligible orders in code, since the backend never enforced the return policy and only the old subagent prompt stood in the way.
+diff --git a/examples/support-desk/app/orchestrator.py b/examples/support-desk/app/orchestrator.py
+index ab29804..08f7217 100644
+--- a/examples/support-desk/app/orchestrator.py
++++ b/examples/support-desk/app/orchestrator.py
+@@ -1,13 +1,16 @@
+-"""The router. It never answers on its own: it delegates each request to a
++"""The main agent. It handles work covered by a skill itself, delegates the rest to a
+ specialist subagent, or hands the whole conversation to claims."""
+ 
+ from __future__ import annotations
+ 
+ from .backend import Backend
+ from .llm import Meter, create, get_client, text_of, tool_uses
++from .skills import load_skill_tool, load_skills, read_skill, skills_section
+ from .subagents import MAX_TURNS, ClaimsSession, Runtime, load_prompt, run_subagent
++from .tools import MAIN_TOOLS, call_tool
+ 
+-DELEGATES = ["orders", "shipping", "returns", "account", "diagnostics"]
++DELEGATES = ["orders", "shipping", "account", "diagnostics"]
++SKILLS = load_skills()
+ 
+ ROUTER_TOOLS = [
+     {
+@@ -31,6 +34,8 @@ ROUTER_TOOLS = [
+             "required": ["summary"],
+         },
+     },
++    load_skill_tool(SKILLS),
++    *MAIN_TOOLS,
+ ]
+ 
+ 
+@@ -65,7 +70,7 @@ class Conversation:
+     def _router_turn(self, user_text: str) -> str:
+         self.messages.append({"role": "user", "content": user_text})
+         for _ in range(MAX_TURNS):
+-            response = create(self.rt.client, self.rt.meter, "router", system=load_prompt("router"),
++            response = create(self.rt.client, self.rt.meter, "router", system=load_prompt("router") + skills_section(SKILLS),
+                               messages=self.messages, tools=ROUTER_TOOLS)
+             self.messages.append({"role": "assistant", "content": response.content})
+             if response.stop_reason != "tool_use":
+@@ -76,9 +81,13 @@ class Conversation:
+                 self.rt.log("tool_call", str(call.input), name=f"router.{call.name}")
+                 if call.name == "delegate":
+                     output = run_subagent(self.rt, call.input["agent"], call.input["brief"])
+-                else:
++                elif call.name == "handoff_to_claims":
+                     handoff_summary = call.input.get("summary", "")
+                     output = "Conversation handed to the claims specialist."
++                elif call.name == "load_skill":
++                    output = read_skill(SKILLS, call.input.get("name", ""))
++                else:
++                    output = call_tool(self.rt.backend, call.name, call.input)
+                 self.rt.log("tool_result", output)
+                 results.append({"type": "tool_result", "tool_use_id": call.id, "content": output})
+             self.messages.append({"role": "user", "content": results})
+diff --git a/examples/support-desk/app/prompts/router.md b/examples/support-desk/app/prompts/router.md
+index 8e07e09..62ddc1a 100644
+--- a/examples/support-desk/app/prompts/router.md
++++ b/examples/support-desk/app/prompts/router.md
+@@ -1,12 +1,10 @@
+-You are the Tamberwick Home support router.
++You are the Tamberwick Home support agent.
+ 
+-CRITICAL: You MUST NEVER answer a customer question yourself. ALWAYS delegate to a specialist.
+ Think step by step before choosing a specialist.
+ 
+ Specialists you can delegate to:
+ - orders: looks up orders.
+ - shipping: tracks shipments. Needs a tracking id.
+-- returns: handles returns.
+ - account: account changes.
+ - diagnostics: device troubleshooting.
+ 
+@@ -16,7 +14,6 @@ specialist talks to the customer directly until the claim is opened.
+ Rules added by teams:
+ - [orders team] Always call orders before shipping so shipping has a tracking id.
+ - [shipping team] If the customer asks about delivery timing, route to shipping first.
+-- [returns team] If the customer mentions a return, route to returns even if they also ask about something else.
+ - [account team] Never reveal a customer's full address in a reply.
+ - [diagnostics team] Device questions go to diagnostics. Do not guess at error codes.
+ - [brand] Be warm and concise. Use the customer's first name if you know it.
+diff --git a/examples/support-desk/app/skills.py b/examples/support-desk/app/skills.py
+new file mode 100644
+index 0000000..27a197a
+--- /dev/null
++++ b/examples/support-desk/app/skills.py
+@@ -0,0 +1,41 @@
++"""Skills the main agent loads on demand. Only each skill's name and description go into
++the system prompt; the body comes back from the load_skill tool."""
++
++from __future__ import annotations
++
++import re
++from pathlib import Path
++
++SKILLS_DIR = Path(__file__).parent / "skills"
++
++
++def load_skills(directory: Path = SKILLS_DIR) -> dict[str, dict]:
++    skills = {}
++    for path in sorted(directory.glob("*/SKILL.md")):
++        front = re.match(r"---\n(.*?)\n---\n", path.read_text(), re.S)
++        meta = dict(re.findall(r"^(\w+):\s*(.+)$", front.group(1), re.M)) if front else {}
++        skills[meta.get("name", path.parent.name)] = {"description": meta.get("description", ""), "path": path}
++    return skills
++
++
++def skills_section(skills: dict[str, dict]) -> str:
++    listing = "\n".join(f"- {name}: {skill['description']}" for name, skill in skills.items())
++    return f"\n\n## Skills\n\nLoad a skill with load_skill before doing work it covers.\n\n{listing}"
++
++
++def load_skill_tool(skills: dict[str, dict]) -> dict:
++    return {
++        "name": "load_skill",
++        "description": "Load the full instructions for one skill. Do this before work the skill covers.",
++        "input_schema": {
++            "type": "object",
++            "properties": {"name": {"type": "string", "enum": sorted(skills)}},
++            "required": ["name"],
++        },
++    }
++
++
++def read_skill(skills: dict[str, dict], name: str) -> str:
++    if name not in skills:
++        return f"No skill named {name}."
++    return skills[name]["path"].read_text()
+diff --git a/examples/support-desk/app/skills/returns/SKILL.md b/examples/support-desk/app/skills/returns/SKILL.md
+new file mode 100644
+index 0000000..93a3ac1
+--- /dev/null
++++ b/examples/support-desk/app/skills/returns/SKILL.md
+@@ -0,0 +1,30 @@
++---
++name: returns
++description: Returning or sending back an item from an order, and questions about whether an order can be returned. Load before checking eligibility or creating a return.
++---
++
++# Returns
++
++A good result: an eligible order gets a return created and the customer gets the RMA id and
++the label link. An ineligible order gets no return and a plain explanation of which rule
++applies.
++
++## How to do it
++
++1. If the customer names the item but not the order, find the order with `get_order` first.
++2. Call `check_return_eligibility` before you tell the customer anything about whether the
++   return can happen. The answer depends on dates and order flags you cannot see otherwise.
++3. If it is eligible, call `create_return` with the closest reason. Pick `other` when none
++   fits rather than guessing.
++4. Give the customer the RMA id and the label link from the result.
++
++## Rules and why
++
++These are enforced in `create_return`. They are listed here so you can explain an outcome.
++
++- Items can be returned within 30 days of delivery.
++- Final sale items can never be returned.
++- An order that has not been delivered cannot be returned yet.
++
++If the order is not eligible, say which rule applies and do not offer an exception. Nobody
++in this conversation can grant one.
+diff --git a/examples/support-desk/app/tools.py b/examples/support-desk/app/tools.py
+index f89897c..525b16b 100644
+--- a/examples/support-desk/app/tools.py
++++ b/examples/support-desk/app/tools.py
+@@ -23,6 +23,19 @@ CUSTOMER_ID = {"type": "string", "description": "Customer id, for example C-1001
+ 
+ GET_ORDER = _tool("get_order", "Look up one order: item, status, delivery date, tracking id.",
+                   {"order_id": ORDER_ID}, ["order_id"])
++CHECK_RETURN_ELIGIBILITY = _tool("check_return_eligibility", "Check whether an order can be returned.",
++                                 {"order_id": ORDER_ID}, ["order_id"])
++RETURN_REASONS = ["too_small", "too_large", "changed_mind", "defective", "other"]
++CREATE_RETURN = _tool("create_return",
++                      "Create a return and a prepaid label. Refuses orders that are not eligible.",
++                      {"order_id": ORDER_ID, "reason": {"type": "string", "enum": RETURN_REASONS}},
++                      ["order_id", "reason"])
++
++# Tools that change something in the backend. A harness can put an approval step in front of these.
++WRITE_TOOLS = {"create_return", "update_shipping_address", "set_marketing_opt_in", "open_claim"}
++
++# Tools the main agent calls itself, by folded subagent.
++MAIN_TOOLS = [GET_ORDER, CHECK_RETURN_ELIGIBILITY, CREATE_RETURN]
+ 
+ TOOLS_BY_AGENT: dict[str, list[dict]] = {
+     "orders": [
+@@ -33,13 +46,7 @@ TOOLS_BY_AGENT: dict[str, list[dict]] = {
+         _tool("get_tracking", "Carrier status and ETA for a tracking id such as TRK-77002.",
+               {"tracking_id": {"type": "string"}}, ["tracking_id"]),
+     ],
+-    "returns": [
+-        GET_ORDER,
+-        _tool("check_return_eligibility", "Check whether an order can be returned.",
+-              {"order_id": ORDER_ID}, ["order_id"]),
+-        _tool("create_return", "Create a return and a prepaid label.",
+-              {"order_id": ORDER_ID, "reason": {"type": "string"}}, ["order_id", "reason"]),
+-    ],
++    "returns": [GET_ORDER, CHECK_RETURN_ELIGIBILITY, CREATE_RETURN],
+     "account": [
+         _tool("get_account", "Read a customer's account.", {"customer_id": CUSTOMER_ID}, ["customer_id"]),
+         _tool("update_shipping_address", "Replace the customer's default shipping address.",
+@@ -69,6 +76,12 @@ def call_tool(backend: Backend, name: str, args: dict) -> str:
+     fn = getattr(backend, name, None)
+     if fn is None or name.startswith("_"):
+         return json.dumps({"error": f"Unknown tool {name}."})
++    if name == "create_return":
++        # The backend API does not enforce the return policy, so the tool does.
++        check = backend.check_return_eligibility(str(args.get("order_id", "")))
++        if not check.get("eligible"):
++            why = check.get("reason") or check.get("error", "")
++            return json.dumps({"error": f"No return was created. {why}".strip()})
+     try:
+         return json.dumps(fn(**args))
+     except TypeError as exc:
+diff --git a/tests/test_kit.py b/tests/test_kit.py
+index 414f7ca..3f7785c 100644
+--- a/tests/test_kit.py
++++ b/tests/test_kit.py
+@@ -129,6 +129,17 @@ class ExampleSmoke(unittest.TestCase):
+         self.assertTrue(start_return({"order_id": "5001", "reason": "too_small"})["created"])
+         self.assertEqual([a["args"]["order_id"] for a in conversation.rt.backend.actions], ["5001"])
+ 
++    def test_return_policy_is_enforced_by_the_tool_in_the_app(self):
++        from app.backend import Backend
++        from app.tools import call_tool
++        backend = Backend()
++        for order_id in ("5003", "5008", "5002", "9999"):    # too old, final sale, not delivered, unknown
++            refused = json.loads(call_tool(backend, "create_return", {"order_id": order_id, "reason": "other"}))
++            self.assertIn("No return was created", refused["error"])
++        created = json.loads(call_tool(backend, "create_return", {"order_id": "5001", "reason": "too_small"}))
++        self.assertEqual(created["rma_id"], "RMA-5001")
++        self.assertEqual([a["args"]["order_id"] for a in backend.actions], ["5001"])
++
+ 
+ def _reply(*blocks, stop="tool_use"):
+     return SimpleNamespace(content=list(blocks), stop_reason=stop,
+
+
+# Commit 2: Only dispatch tools the main agent declares
+# The main agent's tool calls were passed straight to the backend by name, so any backend method could run. Calls outside the declared returns tools now get an unknown-tool error.
+diff --git a/examples/support-desk/app/orchestrator.py b/examples/support-desk/app/orchestrator.py
+index 08f7217..99477e7 100644
+--- a/examples/support-desk/app/orchestrator.py
++++ b/examples/support-desk/app/orchestrator.py
+@@ -3,6 +3,8 @@ specialist subagent, or hands the whole conversation to claims."""
+ 
+ from __future__ import annotations
+ 
++import json
++
+ from .backend import Backend
+ from .llm import Meter, create, get_client, text_of, tool_uses
+ from .skills import load_skill_tool, load_skills, read_skill, skills_section
+@@ -11,6 +13,7 @@ from .tools import MAIN_TOOLS, call_tool
+ 
+ DELEGATES = ["orders", "shipping", "account", "diagnostics"]
+ SKILLS = load_skills()
++MAIN_TOOL_NAMES = {tool["name"] for tool in MAIN_TOOLS}
+ 
+ ROUTER_TOOLS = [
+     {
+@@ -86,8 +89,10 @@ class Conversation:
+                     output = "Conversation handed to the claims specialist."
+                 elif call.name == "load_skill":
+                     output = read_skill(SKILLS, call.input.get("name", ""))
+-                else:
++                elif call.name in MAIN_TOOL_NAMES:
+                     output = call_tool(self.rt.backend, call.name, call.input)
++                else:
++                    output = json.dumps({"error": f"Unknown tool {call.name}."})
+                 self.rt.log("tool_result", output)
+                 results.append({"type": "tool_result", "tool_use_id": call.id, "content": output})
+             self.messages.append({"role": "user", "content": results})

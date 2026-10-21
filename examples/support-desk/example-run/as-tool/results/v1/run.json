@@ -1,0 +1,17 @@
+{
+  "runs": [
+    {
+      "started_at": "2026-10-09T13:50:37Z",
+      "ended_at": "2026-10-09T14:06:41Z",
+      "model": "claude-opus-5",
+      "app": "app",
+      "reps": 2,
+      "only": null,
+      "cases": "evals/golden.jsonl",
+      "git_commit": "52251d4",
+      "skills_off": null,
+      "rows_written": 34,
+      "errors": 0
+    }
+  ]
+}

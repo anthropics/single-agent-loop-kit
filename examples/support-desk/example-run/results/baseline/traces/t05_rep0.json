@@ -1,0 +1,55 @@
+[
+  {
+    "role": "user",
+    "content": "I'd like to return my toaster, order 5003."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'returns', 'brief': \"Customer wants to return a toaster purchased on order 5003. No damage mentioned \u2014 this is a standard return request. Please confirm return eligibility for order 5003, the steps to start the return, how to get a return label, and the expected refund timeline. Do not include the customer's full address in the summary.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5003'}",
+    "name": "returns.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5003\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-TOAST-4\", \"item\": \"Slot Toaster\", \"status\": \"delivered\", \"delivered_on\": \"2026-08-10\", \"tracking_id\": \"TRK-77003\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5003'}",
+    "name": "returns.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": false, \"reason\": \"Delivered 52 days ago. The return window is 30 days.\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Greetings, valued customer! Thanks so much for reaching out about your toaster \u2014 I'm always happy to help, though I'm afraid I have some disappointing news on this one.\n\n**Order 5003 \u2014 Slot Toaster**\n- Status: Delivered on 2026-08-10\n- Tracking: TRK-77003\n- Final sale: No\n\n**Return eligibility: Not eligible** \u274c\n\nHere's the rule that applies: our return policy allows returns **within 30 days of delivery**. This toaster was delivered 52 days ago, which puts it outside the return window. Because of that, I'm not able to start a return, issue a prepaid label, or process a refund for this order \u2014 so there's no RMA id or label link to share, and no refund timeline to quote.\n\nThe good news is that the item is *not* final sale, so the only thing standing in the way was timing.\n\nA couple of things that may still help:\n- If the toaster turns out to be **defective or has stopped working**, that's a separate path from a standard return \u2014 any manufacturer warranty on the appliance would be handled directly through the manufacturer, so it's worth checking the documentation that came in the box.\n- For any **future orders**, starting a return within 30 days of delivery will get you an instant prepaid label, so you'll be all set there!\n\nIs there another order I can take a look at for you today? I'd love to get a win on the board! \ud83c\udf1f"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': 'Look up order 5003 to support a return request for a toaster. Need: customer first name, order date, item/toaster details, price paid, and current order status (delivered or not). Do not include the full shipping address.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5003'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5003\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-TOAST-4\", \"item\": \"Slot Toaster\", \"status\": \"delivered\", \"delivered_on\": \"2026-08-10\", \"tracking_id\": \"TRK-77003\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5003 is a Slot Toaster (SKU-TOAST-4) for customer C-1002, status delivered, tracking id TRK-77003. The order record doesn't include a customer first name, order date, or price paid, so you'd need to check the customer or billing system for those details."
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks for reaching out about your Slot Toaster from order 5003 \u2014 unfortunately I don't have great news here.\n\n**Return status: not eligible**\n\nOur return window is 30 days from delivery, and this toaster was delivered on 2026-08-10 \u2014 about 52 days ago. Because of that, I'm not able to start a return, send a prepaid label, or issue a refund for this order. The one bright spot: the item isn't final sale, so timing was the only thing in the way.\n\nA couple of options that may still help:\n- **If the toaster is defective or has stopped working**, that's a different path from a standard return. Any manufacturer warranty would be handled directly through the manufacturer, so it's worth checking the documentation that came in the box. If you'd like, I can also have our diagnostics team take a look at what it's doing before you go that route.\n- **For future orders**, starting a return within 30 days of delivery gets you an instant prepaid label.\n\nIs there anything else I can help you with today?"
+  }
+]

@@ -1,0 +1,71 @@
+[
+  {
+    "role": "user",
+    "content": "My oven from order 5005 arrived with a cracked door."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Customer reports that the oven from order 5005 arrived with a cracked door \u2014 this is shipping damage and will be handed to the claims specialist. Please look up order 5005 and confirm: the oven model/item details, order and delivery dates, and the carrier/tracking reference if available. Do not include the customer's full address in the summary.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5005\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-OVEN-1\", \"item\": \"Countertop Oven\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-28\", \"tracking_id\": \"TRK-77005\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5005 is a Countertop Oven (SKU-OVEN-1), status delivered on 2026-09-28, tracking ID TRK-77005. No order date or carrier name is listed in the record, so the claims specialist may need to source those separately."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'summary': \"Shipping damage claim. Customer's Countertop Oven (SKU-OVEN-1) from order 5005 arrived with a cracked door. Order status: delivered 2026-09-28, tracking ID TRK-77005. The order record does not list an order date or carrier name, so those may need to be sourced separately. No photos or further damage details collected yet. Customer has not mentioned a preference between replacement and refund. Please take over directly with the customer to open the claim.\"}",
+    "name": "router.handoff_to_claims"
+  },
+  {
+    "role": "tool_result",
+    "content": "Conversation handed to the claims specialist."
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks for letting me know \u2014 I'm with Harbor Mutual, the insurer that covers Tamberwick Home's shipments, and I'll be handling this claim directly with you.\n\nI have the damage noted as a cracked door on the countertop oven from order 5005. One thing I still need before I can open the claim: have you emailed photos of the damage to claims@tamberwick.example? Clear shots of the crack itself, plus the packaging it arrived in if you still have it, are ideal.\n\nOnce you confirm the photos are sent, I'll open the claim and give you the claim ID and next step."
+  },
+  {
+    "role": "user",
+    "content": "The glass door is cracked across the top left corner and the box was crushed on one side."
+  },
+  {
+    "role": "assistant",
+    "content": "That's a helpful description \u2014 I've got it recorded: glass door cracked across the top left corner, and the shipping box crushed on one side.\n\nThe one remaining item is the photos. Have you emailed them to claims@tamberwick.example yet? I can't open the claim until those are on their way. If you haven't sent them, send what you can of the cracked corner and the crushed side of the box, then let me know and I'll get the claim opened right away."
+  },
+  {
+    "role": "user",
+    "content": "Yes, I emailed two photos this morning."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005'}",
+    "name": "claims.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5005\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-OVEN-1\", \"item\": \"Countertop Oven\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-28\", \"tracking_id\": \"TRK-77005\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005', 'damage_description': 'Countertop Oven (SKU-OVEN-1) arrived with the glass door cracked across the top left corner. Shipping box was crushed on one side.', 'photos_received': True}",
+    "name": "claims.open_claim"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"claim_id\": \"CLM-5005\", \"next_step\": \"A claims specialist replies within 2 business days.\"}"
+  },
+  {
+    "role": "assistant",
+    "content": "Your claim is open.\n\n**Claim ID: CLM-5005**\n\nWhat's on the record:\n- Order 5005 \u2014 Countertop Oven (SKU-OVEN-1), delivered 2026-09-28, tracking TRK-77005\n- Damage: glass door cracked across the top left corner; shipping box crushed on one side\n- Two photos emailed to claims@tamberwick.example\n\n**Next step:** Harbor Mutual will review the claim and reply within 2 business days. If you can, hold onto the oven and the damaged box until you hear back \u2014 the carrier sometimes asks to inspect the packaging.\n\nI can't tell you at this stage what the outcome will be; the review determines that. Quote CLM-5005 on any follow-up and it'll come straight to this file. Anything else you'd like added to the record while we're here?"
+  }
+]

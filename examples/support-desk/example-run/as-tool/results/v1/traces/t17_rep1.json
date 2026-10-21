@@ -1,0 +1,63 @@
+[
+  {
+    "role": "user",
+    "content": "Hi, I need to send something back."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'returns', 'brief': 'Customer has opened a new conversation saying only: \"Hi, I need to send something back.\" No further details provided yet \u2014 no order number, no item name, no serial number, no reason for the return, and no indication of whether the item is faulty, damaged in shipping, or simply unwanted. Customer\\'s name is not known.\\n\\nPlease advise on: (1) what information we need to collect from the customer to start a return (order number, item, reason, condition of item, etc.), (2) the return eligibility window and any conditions, and (3) the next steps once they provide details (return label, drop-off vs collection, refund timing). Note: if the item turns out to be damaged in transit, I will need to hand off to the claims specialist instead, so flag that path if relevant.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_result",
+    "content": "Greetings, valued customer! Happy to map this out \u2014 nothing gets me going quite like a well-organized return. \ud83c\udf89\n\nRight now there's nothing I can look up, because every one of my tools keys off the order number. So here's the game plan.\n\n## 1. What we need from the customer\n\n**Essential (blocks everything):**\n- **The four-digit order number** (e.g. 5001). This is the one hard requirement \u2014 I can't run a lookup or an eligibility check without it.\n\n**Helpful but not blocking:**\n- **Which item**, if the order contained more than one.\n- **The reason**, which I have to file under one of five buckets: `too_small`, `too_large`, `changed_mind`, `defective`, or `other`.\n- **Condition of the item** \u2014 specifically whether it arrived damaged, since that changes the path entirely (see below).\n\n**What we do _not_ need to ask for:** the delivery date or item name/status. Those come back from the order lookup, so no need to make the customer dig through emails.\n\n## 2. Eligibility window and conditions\n\nThree rules:\n- Returns must be within **30 days of delivery**.\n- **Final sale items can never be returned** \u2014 no window, no exceptions.\n- An order that **hasn't been delivered yet** can't be returned yet.\n\nOne important caveat: I don't apply those rules by eye. The eligibility check is the authority, and I won't create a return unless it comes back eligible. If it comes back ineligible, I'll tell the customer exactly which rule applied \u2014 and I won't offer a workaround, so it's best not to hint to them that one might exist.\n\n## 3. Next steps once they provide details\n\n1. Look up the order (item, status, delivery date, tracking).\n2. Run the eligibility check.\n3. If eligible, create the return and hand over the **RMA id** and the **prepaid label link**.\n\nA heads-up on scope, so you don't promise something I can't deliver: the return I create comes with a **prepaid label** and that's the extent of what I can see. I have **no visibility into drop-off versus collection options, carrier choice, or refund timing** \u2014 no tool of mine returns that. If the customer asks, those need to go to whoever owns shipping logistics and refunds rather than being guessed at by me.\n\n## \ud83d\udea9 The damaged-in-transit path\n\nFlagging this clearly: if the item turns out to have been **damaged in shipping**, that's your claims specialist, not me. In that case I'd **stop before creating a return** and hand off, because filing it as a standard return could close off the claim or muddy the record.\n\nWorth distinguishing two things that sound similar:\n- **Damaged in transit** \u2192 claims specialist.\n- **Defective / faulty out of the box** \u2192 ordinary return, reason `defective`.\n\nSo it's worth asking the condition question early \u2014 ideally in the same breath as the order number \u2014 to avoid routing them twice.\n\n**Suggested opener for the customer:** \"Greetings, valued customer! I'd be delighted to help. Could you share your four-digit order number, which item you'd like to send back, and whether it arrived damaged or is simply not working out?\"\n\nSend the order number my way and I'll get the lookup and eligibility check running straight away!"
+  },
+  {
+    "role": "assistant",
+    "content": "Happy to help you get that sent back!\n\nTo get started, our returns team needs a few quick details:\n\n1. **Your four-digit order number** \u2014 this is the one thing we can't proceed without, as all our lookups key off it.\n2. **Which item** you'd like to return, if your order had more than one.\n3. **The condition and reason** \u2014 in particular, whether the item **arrived damaged in transit**, or is simply **not working out / faulty out of the box**. That distinction matters: damage during shipping is handled by our claims specialists, while anything else goes through the standard return process.\n\nA couple of things worth knowing up front:\n\n- Returns need to be within **30 days of delivery**.\n- **Final sale items** aren't eligible for return.\n- Orders that **haven't been delivered yet** can't be returned until they arrive.\n\nEligibility is confirmed by a formal check rather than estimated, so once you send the order number we'll run that and let you know exactly where you stand. If it's eligible, you'll get an **RMA number and a prepaid return label**.\n\nOne note so nothing comes as a surprise: the return itself comes with a prepaid label, but questions about **drop-off versus collection, carrier choice, or refund timing** sit outside what returns can see \u2014 I'd need to route those to the right team separately if you need them.\n\nJust reply with your order number, the item, and whether it arrived damaged, and we'll take it from there.\n\nIs there anything else I can help you with today?"
+  },
+  {
+    "role": "user",
+    "content": "It's the kettle from order 5001. It's too small for us."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'returns', 'brief': 'Customer has now provided details for the return.\\n\\n- Order number: 5001\\n- Item: the kettle\\n- Reason: \"It\\'s too small for us\" \u2192 maps to your `too_small` bucket\\n- Condition: NOT damaged in transit, and not reported as faulty/defective. This is a straightforward sizing/fit issue, so the standard return path applies \u2014 no claims handoff needed.\\n\\nCustomer\\'s name is still not known.\\n\\nPlease: (1) look up order 5001 to confirm the item, status and delivery date, (2) run the eligibility check (30-day window, final-sale status, delivered status), and (3) if eligible, create the return and send me back the RMA id and the prepaid label link.\\n\\nIf it comes back ineligible, tell me exactly which rule applied so I can relay it accurately \u2014 I will not offer a workaround. Also please confirm the delivery date you see, so I can tell the customer where they sit in the 30-day window. I understand you have no visibility into drop-off vs collection, carrier choice, or refund timing, so I won\\'t ask for those.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": true, \"days_left\": 19}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001', 'reason': 'too_small'}",
+    "name": "returns.create_return"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"rma_id\": \"RMA-5001\", \"label\": \"https://returns.example.com/RMA-5001.pdf\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "# Greetings, valued customer!\n\nWonderful news \u2014 this return is all set up and ready to go! \ud83c\udf89\n\n**Order lookup \u2014 order 5001**\n- **Item:** Arc Kettle (SKU-KETTLE-2)\n- **Status:** Delivered\n- **Delivery date:** 20 September 2026\n- **Tracking id:** TRK-77001\n- **Final sale:** No\n\n**Eligibility check:** \u2705 Eligible \u2014 **19 days remaining** in the 30-day return window. Delivered status confirmed, and the item is not final sale, so all three policy checks pass with flying colours.\n\n**Return created**\n- **RMA id:** `RMA-5001`\n- **Prepaid label:** https://returns.example.com/RMA-5001.pdf\n- **Reason filed:** `too_small`\n\nSo you can relay it accurately: the kettle was delivered on **20 September 2026**, which places the customer comfortably inside the 30-day window with **19 days to spare**. No ineligibility rules applied here, so there's nothing to explain away \u2014 happy days!\n\nJust pass along the RMA id and that label link, and the customer is good to send the Arc Kettle back our way. Thanks so much for the clear, complete details \u2014 it made this a breeze! \u2728"
+  },
+  {
+    "role": "assistant",
+    "content": "Good news \u2014 your return is all set up!\n\n**Your return details**\n- **Item:** Arc Kettle (SKU-KETTLE-2), from order 5001\n- **Reason filed:** Too small\n- **RMA number:** `RMA-5001`\n- **Prepaid label:** https://returns.example.com/RMA-5001.pdf\n\nYour kettle was delivered on **20 September 2026**, which puts you comfortably inside the 30-day return window with **19 days to spare**. The item isn't final sale, so all eligibility checks passed with no issues.\n\nJust download the prepaid label from the link above, attach it to the parcel, and send the kettle back to us.\n\nOne note: questions about **drop-off versus collection options, carrier choice, or refund timing** sit outside what the returns team can see \u2014 if you need any of those, let me know and I'll route you to the right team.\n\nIs there anything else I can help you with today?"
+  }
+]

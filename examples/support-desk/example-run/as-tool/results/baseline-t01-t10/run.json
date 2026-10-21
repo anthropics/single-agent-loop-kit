@@ -1,0 +1,30 @@
+{
+  "runs": [
+    {
+      "started_at": "2026-10-09T14:13:45Z",
+      "ended_at": "2026-10-09T14:15:19Z",
+      "model": "claude-opus-5",
+      "app": "app",
+      "reps": 4,
+      "only": "t01",
+      "cases": "evals/golden.jsonl",
+      "git_commit": "0610370",
+      "skills_off": null,
+      "rows_written": 4,
+      "errors": 0
+    },
+    {
+      "started_at": "2026-10-09T14:15:21Z",
+      "ended_at": "2026-10-09T14:17:09Z",
+      "model": "claude-opus-5",
+      "app": "app",
+      "reps": 4,
+      "only": "t10",
+      "cases": "evals/golden.jsonl",
+      "git_commit": "0610370",
+      "skills_off": null,
+      "rows_written": 4,
+      "errors": 0
+    }
+  ]
+}

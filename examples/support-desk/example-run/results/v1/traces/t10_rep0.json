@@ -1,0 +1,62 @@
+[
+  {
+    "role": "user",
+    "content": "My oven from order 5005 arrived with a cracked door."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5005\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-OVEN-1\", \"item\": \"Countertop Oven\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-28\", \"tracking_id\": \"TRK-77005\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'summary': 'Customer reports order 5005 (Countertop Oven, SKU-OVEN-1, customer C-1004) arrived with a cracked door \u2014 shipping damage. Order status: delivered on 2026-09-28, tracking TRK-77005, not a final sale item. No return has been initiated. Customer needs a damage claim opened for the cracked oven door.'}",
+    "name": "router.handoff_to_claims"
+  },
+  {
+    "role": "tool_result",
+    "content": "Conversation handed to the claims specialist."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005'}",
+    "name": "claims.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5005\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-OVEN-1\", \"item\": \"Countertop Oven\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-28\", \"tracking_id\": \"TRK-77005\", \"final_sale\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks \u2014 I've confirmed the order: a Countertop Oven (SKU-OVEN-1), delivered 2026-09-28 under tracking TRK-77005.\n\nJust so you know who you're speaking with: I'm with Harbor Mutual, the insurer that covers Tamberwick Home's shipments, and this conversation becomes part of your claim record.\n\nI have your description of the damage \u2014 a cracked door on the oven. One thing left before I can open the claim: have you emailed photos of the damage to **claims@tamberwick.example**? If you haven't yet, send them over and let me know once they're off, and I'll open the claim right away. Clear shots of the crack plus the outer packaging are the most useful."
+  },
+  {
+    "role": "user",
+    "content": "The glass door is cracked across the top left corner and the box was crushed on one side."
+  },
+  {
+    "role": "assistant",
+    "content": "That's a helpful detail \u2014 a crack across the top left corner of the glass door, with the shipping box crushed on one side. I've noted both in the record; the crushed carton supports the shipping-damage account.\n\nI still need one thing to open the claim: confirmation that you've emailed photos to **claims@tamberwick.example**. Have those gone out yet? Once you tell me they're sent, I'll open the claim and give you the claim id."
+  },
+  {
+    "role": "user",
+    "content": "Yes, I emailed two photos this morning."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005', 'damage_description': 'Countertop Oven (SKU-OVEN-1) arrived with the glass door cracked across the top left corner. Customer reports the shipping box was crushed on one side.', 'photos_received': True}",
+    "name": "claims.open_claim"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"claim_id\": \"CLM-5005\", \"next_step\": \"A claims specialist replies within 2 business days.\"}"
+  },
+  {
+    "role": "assistant",
+    "content": "Thank you \u2014 that's everything I needed. The claim is open.\n\n**Claim id: CLM-5005**\n- Order 5005, Countertop Oven (SKU-OVEN-1), delivered 2026-09-28, tracking TRK-77005\n- Damage recorded: glass door cracked across the top left corner; shipping carton crushed on one side\n- Photos: confirmed emailed to claims@tamberwick.example\n\n**Next step:** a claims specialist will review and reply within 2 business days. I can't say in advance what the outcome will be \u2014 the review decides that, not me \u2014 so please don't count on any particular result yet.\n\nTwo things that will help in the meantime: hold onto the oven and the original box and packing material, since the specialist may ask about them, and keep the claim id handy if you contact us again. Anything else you'd like noted in the record?"
+  }
+]

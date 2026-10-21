@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Has order 5006 shipped yet?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Customer is asking whether order 5006 has shipped yet. Please look up order 5006 and report its current status, the items on it, the ship date if any, and most importantly the tracking id (carrier + tracking number) so the shipping specialist can track it. Also note the customer's first name if available. Do not include the customer's full address.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5006'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5006\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"processing\", \"delivered_on\": null, \"tracking_id\": null, \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5006 is for one Arc Kettle (SKU-KETTLE-2) and is currently in processing, with no ship date or tracking id assigned yet. The record lists customer id C-1002 but no first name."
+  },
+  {
+    "role": "assistant",
+    "content": "Order 5006 hasn't shipped yet \u2014 it's still in processing.\n\n- **Item:** Arc Kettle (SKU-KETTLE-2)\n- **Status:** Processing \u2014 no ship date or tracking number assigned yet\n\nOnce it's dispatched, a tracking number will be generated and you'll be able to follow its progress. I wasn't able to get a delivery estimate this time, since tracking only becomes available after the order leaves our warehouse \u2014 if you'd like, I can have the shipping team follow up as soon as it ships.\n\nIs there anything else I can help you with today?"
+  }
+]

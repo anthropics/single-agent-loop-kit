@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Hi, I'm Ana (C-1001). What's the status of order 5002?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': 'Customer Ana, account C-1001, is asking for the status of order 5002. Please look up order 5002 and report its current status, contents, and any tracking id associated with it (tracking id needed in case we route to shipping next).'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5002'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5002\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77002\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5002 contains one Vortex Blender (SKU-BLEND-9) and its current status is shipped. The tracking id is TRK-77002."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Ana! Your order 5002 \u2014 one Vortex Blender (SKU-BLEND-9) \u2014 has shipped, and it's travelling under tracking ID TRK-77002.\n\nIf you'd like, I can have our shipping team check where the parcel is right now and when it's expected to arrive.\n\nIs there anything else I can help you with today?"
+  }
+]

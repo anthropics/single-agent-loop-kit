@@ -1,0 +1,71 @@
+[
+  {
+    "role": "user",
+    "content": "My oven from order 5005 arrived with a cracked door."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Customer reports that the oven from order 5005 arrived with a cracked door. Please look up order 5005 and return: the item(s) on the order (confirm the oven model), order date, delivery/shipment status, tracking id if present, and whether the order is still within any damage-reporting window. This is for a shipping damage claim, so please include anything claims would need. Do not include the customer's full address in your summary.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5005\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-OVEN-1\", \"item\": \"Countertop Oven\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-28\", \"tracking_id\": \"TRK-77005\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5005 is a Countertop Oven (SKU-OVEN-1), status delivered on 2026-09-28, tracking id TRK-77005. I don't have an order date or damage-reporting window policy in my records, so claims will need to confirm those details with the shipping team."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'summary': 'Shipping damage claim: customer reports the oven from order 5005 arrived with a cracked door.\\n\\nOrder details from the orders specialist:\\n- Item: Countertop Oven (SKU-OVEN-1)\\n- Order: 5005, status delivered 2026-09-28\\n- Tracking id: TRK-77005\\n\\nCaveats: orders had no record of the order date or the damage-reporting window policy \u2014 claims will need to confirm those with the shipping team. No device diagnostics were run; the issue is physical damage in transit (cracked door), not a fault. Customer has not yet been asked for photos or a serial number.'}",
+    "name": "router.handoff_to_claims"
+  },
+  {
+    "role": "tool_result",
+    "content": "Conversation handed to the claims specialist."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005'}",
+    "name": "claims.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5005\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-OVEN-1\", \"item\": \"Countertop Oven\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-28\", \"tracking_id\": \"TRK-77005\", \"final_sale\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks \u2014 I'm with Harbor Mutual, the insurer that covers Tamberwick Home's shipments, so I'll be handling this claim directly with you.\n\nI can see order 5005: a Countertop Oven, delivered 2026-09-28 under tracking TRK-77005.\n\nI have your description of the damage \u2014 a cracked door on the oven. Before I can open the claim, I need one more thing:\n\n**Photos.** Please email photos of the damage to **claims@tamberwick.example**, then let me know here that you've sent them. Helpful shots are the cracked door itself, the full oven, and the shipping box and packing material if you still have them.\n\nIf you'd like to add any detail to your description while you're at it \u2014 for example whether the crack runs through the glass or the frame, or whether there was visible damage to the carton \u2014 that's useful for the record, but not required.\n\nOnce you confirm the photos are sent, I'll open the claim and give you the claim id. I can't speak to the outcome at this stage \u2014 that's determined after the claim is reviewed."
+  },
+  {
+    "role": "user",
+    "content": "The glass door is cracked across the top left corner and the box was crushed on one side."
+  },
+  {
+    "role": "assistant",
+    "content": "That's a helpful addition to the record \u2014 cracked glass across the top left corner of the door, with crush damage to one side of the carton. Transit impact damage like that is exactly what this coverage is for, and I've noted it.\n\nI still need the photos before I can open the claim. Please email them to **claims@tamberwick.example** \u2014 the cracked corner of the glass, the oven as a whole, and the crushed side of the box \u2014 and then reply here to confirm you've sent them.\n\nPlease hold on to the box and packing material for now; the reviewer may want to see them.\n\nAs soon as you confirm the photos are on their way, I'll open the claim and pass you the claim id."
+  },
+  {
+    "role": "user",
+    "content": "Yes, I emailed two photos this morning."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005', 'damage_description': 'Countertop Oven (SKU-OVEN-1) arrived with the glass door cracked across the top left corner. Shipping carton was crushed on one side, consistent with impact damage in transit. Customer\\'s own words: \"The glass door is cracked across the top left corner and the box was crushed on one side.\" Delivered 2026-09-28, tracking TRK-77005.', 'photos_received': True}",
+    "name": "claims.open_claim"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"claim_id\": \"CLM-5005\", \"next_step\": \"A claims specialist replies within 2 business days.\"}"
+  },
+  {
+    "role": "assistant",
+    "content": "Your claim is open.\n\n**Claim id: CLM-5005**\n\nWhat's on the record:\n- Order 5005, Countertop Oven (SKU-OVEN-1), delivered 2026-09-28, tracking TRK-77005\n- Damage: glass door cracked across the top left corner; shipping carton crushed on one side\n- Photos: two, emailed to claims@tamberwick.example this morning\n\n**Next step:** a claims specialist will reply within 2 business days. Quote CLM-5005 in any follow-up.\n\nTwo things that will help in the meantime:\n\n- **Keep the box and packing material.** The crushed carton supports your account of transit damage, and the reviewer may ask for it or for additional photos.\n- **Don't use the oven.** Cracked door glass can fail further under heat. This is a safety point, and it also keeps the item in the condition it was received in.\n\nOne note for transparency: there's a reporting window on transit damage claims, and I wasn't able to confirm the exact length of it or your order date from my side. Your delivery date of 2026-09-28 is on the record, which is the date that normally governs, and you've reported promptly \u2014 so I don't expect an issue. The reviewer will confirm it.\n\nI can't tell you the outcome at this stage, and I'm not able to commit to a repair, replacement, or payment \u2014 that decision comes out of the review. What I can tell you is that the claim is properly filed with a description and photos, which is everything needed for it to be assessed."
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Has order 5006 shipped yet?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Customer is asking whether order 5006 has shipped yet. Please look up order 5006 and report: current order status, ship date if shipped, the tracking ID (needed so the shipping specialist can track it), carrier, and the customer's first name if available. Do not include the full shipping address in the summary.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5006'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5006\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"processing\", \"delivered_on\": null, \"tracking_id\": null, \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5006 (Arc Kettle) is still in processing, so there is no ship date, tracking ID, or carrier yet. The record only lists customer ID C-1002 without a first name."
+  },
+  {
+    "role": "assistant",
+    "content": "Good news on clarity, if not on speed:\n\n**Order 5006 (Arc Kettle) hasn't shipped yet** \u2014 it's still in processing. That means there's no ship date, tracking number, or carrier assigned to it at this point. Once it leaves the warehouse, a tracking ID will be generated and I can have our shipping team follow it for you in real time.\n\nIf you'd like, just check back once you receive your shipping confirmation email and I'll track the package right away.\n\nIs there anything else I can help you with today?"
+  }
+]

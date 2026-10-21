@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Has order 5006 shipped yet?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Customer asks whether order 5006 has shipped yet. Please look up order 5006 and return its current status plus the tracking id (needed so the shipping specialist can track the shipment). Also include the customer's first name if available, and the order contents/date if relevant.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5006'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5006\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"processing\", \"delivered_on\": null, \"tracking_id\": null, \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5006 is for an Arc Kettle and is currently in processing, so it has not shipped yet and no tracking id has been generated. No customer first name is available in the order record \u2014 only customer id C-1002."
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks for checking in! Here's where things stand:\n\n- **Order 5006 (Arc Kettle)** is still **in processing**, so it hasn't shipped yet.\n- Because it hasn't left the warehouse, no tracking number has been generated yet \u2014 once it ships, tracking details will be issued and I can have our shipping team follow it for you.\n\nFeel free to check back once you've received a dispatch confirmation, and I'll happily track it down.\n\nIs there anything else I can help you with today?"
+  }
+]

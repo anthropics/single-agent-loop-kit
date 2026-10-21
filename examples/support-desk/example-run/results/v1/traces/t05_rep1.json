@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "I'd like to return my toaster, order 5003."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'name': 'returns'}",
+    "name": "router.load_skill"
+  },
+  {
+    "role": "tool_result",
+    "content": "---\nname: returns\ndescription: Returning or sending back an item from an order, and questions about whether an order can be returned. Load before checking eligibility or creating a return.\n---\n\n# Returns\n\nA good result: an eligible order gets a return created and the customer gets the RMA id and\nthe label link. An ineligible order gets no return and a plain explanation of which rule\napplies.\n\n## How to do it\n\n1. If the customer names the item but not the order, find the order with `get_order` first.\n2. Call `check_return_eligibility` before you tell the customer anything about whether the\n   return can happen. The answer depends on dates and order flags you cannot see otherwise.\n3. If it is eligible, call `create_return` with the closest reason. Pick `other` when none\n   fits rather than guessing.\n4. Give the customer the RMA id and the label link from the result.\n\n## Rules and why\n\nThese are enforced in `create_return`. They are listed here so you can explain an outcome.\n\n- Items can be returned within 30 days of delivery.\n- Final sale items can never be returned.\n- An order that has not been delivered cannot be returned yet.\n\nIf the order is not eligible, say which rule applies and do not offer an exception. Nobody\nin this conversation can grant one.\n"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5003'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5003\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-TOAST-4\", \"item\": \"Slot Toaster\", \"status\": \"delivered\", \"delivered_on\": \"2026-08-10\", \"tracking_id\": \"TRK-77003\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5003'}",
+    "name": "router.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": false, \"reason\": \"Delivered 52 days ago. The return window is 30 days.\"}"
+  },
+  {
+    "role": "assistant",
+    "content": "I checked on order 5003 (Slot Toaster), and unfortunately I can't set up a return for it. It was delivered on August 10, 2026 \u2014 52 days ago \u2014 and our return window is 30 days from delivery. Since that window has closed, a return can't be created, and that's not something I'm able to make an exception for.\n\nIf the toaster is malfunctioning rather than just unwanted, let me know and I can connect you with our diagnostics team to troubleshoot it.\n\nIs there anything else I can help you with today?"
+  }
+]

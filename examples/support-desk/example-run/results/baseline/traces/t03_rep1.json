@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "Has order 5006 shipped yet?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Customer is asking whether order 5006 has shipped yet. Please look up order 5006 and return its current status, the items on it, the customer's first name, and the tracking ID (or carrier reference) if a shipment has been created. The tracking ID is needed so I can hand off to the shipping specialist for delivery timing.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5006'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5006\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"processing\", \"delivered_on\": null, \"tracking_id\": null, \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002'}",
+    "name": "orders.list_orders"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"customer_id\": \"C-1002\", \"orders\": [{\"order_id\": \"5003\", \"item\": \"Slot Toaster\", \"status\": \"delivered\"}, {\"order_id\": \"5006\", \"item\": \"Arc Kettle\", \"status\": \"processing\"}]}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5006 is for one Arc Kettle (SKU-KETTLE-2) and is still in \"processing\" status, so no shipment has been created and there is no tracking ID to hand off yet. I don't have the customer's first name available \u2014 only the customer ID C-1002."
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks for checking in! Order 5006 (one Arc Kettle) is still in **processing**, so it hasn't shipped yet \u2014 no shipment or tracking number has been created for it so far. As soon as it ships, tracking details will be generated and I can look up delivery timing for you.\n\nIs there anything else I can help you with today?"
+  }
+]

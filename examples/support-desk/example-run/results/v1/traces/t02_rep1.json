@@ -1,0 +1,55 @@
+[
+  {
+    "role": "user",
+    "content": "Where is order 5007 and when will it arrive?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5007'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5007\", \"customer_id\": \"C-1003\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77007\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': 'Customer is asking about the location and expected arrival of order 5007. Please look up order 5007 and report the item, current status, delivery date, and tracking id so I can pass the tracking id to the shipping specialist.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5007'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5007\", \"customer_id\": \"C-1003\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77007\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5007 is a Vortex Blender, currently shipped, with tracking id TRK-77007. I'll leave the expected arrival to the shipping specialist \u2014 please pass that tracking id along to them."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'shipping', 'brief': 'Customer asked where order 5007 is and when it will arrive. Order 5007 is a Vortex Blender, status \"shipped\", tracking id TRK-77007, no delivery date recorded yet. Please track TRK-77007 and report the shipment\\'s current location/status and the estimated delivery date. Note: do not include the customer\\'s full street address in your summary.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'tracking_id': 'TRK-77007'}",
+    "name": "shipping.get_tracking"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"tracking_id\": \"TRK-77007\", \"carrier\": \"Bluebird\", \"state\": \"delayed\", \"eta\": \"2026-10-06\", \"last_event\": \"Weather delay at Minneapolis hub\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "**Order 5007 \u2014 Vortex Blender (TRK-77007)**\n\n- **Carrier:** Bluebird\n- **Shipment state:** Delayed\n- **Estimated delivery:** October 6\n- **Last event:** Weather delay at Minneapolis hub\n\nThe package is currently held up at the Minneapolis hub due to weather. It's still moving through the Bluebird network, just behind schedule \u2014 the revised ETA is October 6. No delivery date has been confirmed on our side yet, so I'd suggest letting the customer know we'll follow up once Bluebird scans it back out of the hub."
+  },
+  {
+    "role": "assistant",
+    "content": "Your Vortex Blender (order 5007) is on its way via Bluebird, tracking number TRK-77007.\n\nRight now it's held at the carrier's Minneapolis hub because of a weather delay, so it's running a bit behind schedule. The revised estimated delivery is **October 6**. Once Bluebird scans it back out of that hub, we'll have a firmer date and can follow up with you.\n\nIs there anything else I can help you with today?"
+  }
+]

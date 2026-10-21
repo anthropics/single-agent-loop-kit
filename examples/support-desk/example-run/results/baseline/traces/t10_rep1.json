@@ -1,0 +1,53 @@
+[
+  {
+    "role": "user",
+    "content": "My oven from order 5005 arrived with a cracked door."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'summary': 'Customer reports their oven from order 5005 arrived with a cracked door \u2014 damage discovered on delivery. No tracking or claim details gathered yet. Please work with the customer directly to collect damage photos/details and open the shipping damage claim for order 5005.'}",
+    "name": "router.handoff_to_claims"
+  },
+  {
+    "role": "tool_result",
+    "content": "Conversation handed to the claims specialist."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005'}",
+    "name": "claims.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5005\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-OVEN-1\", \"item\": \"Countertop Oven\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-28\", \"tracking_id\": \"TRK-77005\", \"final_sale\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks \u2014 I'm the claims specialist with Harbor Mutual, the insurer that covers Tamberwick Home's shipments. I have order 5005 on record: a Countertop Oven, delivered 2026-09-28, tracking TRK-77005.\n\nI have your description of the damage \u2014 a cracked door on the oven. One more thing before I can open the claim: have you emailed photos of the damage to claims@tamberwick.example? Photos of the cracked door and, if you still have it, the shipping carton are helpful.\n\nOnce you confirm the photos are sent, I'll open the claim and give you the claim ID."
+  },
+  {
+    "role": "user",
+    "content": "The glass door is cracked across the top left corner and the box was crushed on one side."
+  },
+  {
+    "role": "assistant",
+    "content": "That's a helpful description \u2014 thank you. I've noted: glass door cracked across the top left corner, and the shipping box crushed on one side. The crushed carton is useful detail for a shipping damage claim.\n\nI still need one thing before I can open the claim: confirmation that you've emailed photos to **claims@tamberwick.example**. Based on what you've described, the photos to send are:\n\n- The crack on the glass door (top left corner)\n- The crushed side of the shipping box\n- The oven as a whole, in the carton if possible\n\nHave you sent those yet? Just let me know once they're on their way and I'll open the claim and give you the claim ID."
+  },
+  {
+    "role": "user",
+    "content": "Yes, I emailed two photos this morning."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5005', 'damage_description': 'Customer reports the Countertop Oven (SKU-OVEN-1) arrived damaged: glass door cracked across the top left corner. Shipping carton was crushed on one side. Damage discovered on delivery (delivered 2026-09-28, tracking TRK-77005).', 'photos_received': True}",
+    "name": "claims.open_claim"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"claim_id\": \"CLM-5005\", \"next_step\": \"A claims specialist replies within 2 business days.\"}"
+  },
+  {
+    "role": "assistant",
+    "content": "Your claim is open. Here are the details for your records:\n\n**Claim ID: CLM-5005**\n- Order 5005 \u2014 Countertop Oven (tracking TRK-77005, delivered 2026-09-28)\n- Damage recorded: glass door cracked across the top left corner; shipping carton crushed on one side\n- Photos: confirmed emailed to claims@tamberwick.example\n\n**Next step:** A claims specialist will review the file and reply to you within 2 business days. There's nothing further you need to do right now.\n\nTwo things that will help the review: please hold on to the oven, the original carton, and the packing material until you hear back, in case an inspection is needed. And if you take any additional photos, send them to the same address with your claim ID, CLM-5005, in the subject line.\n\nI can't say in advance what the outcome will be \u2014 that decision comes from the specialist's review. If you have questions in the meantime, quote CLM-5005 and we'll pull up this record."
+  }
+]

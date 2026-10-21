@@ -1,0 +1,19 @@
+[
+  {
+    "role": "user",
+    "content": "Hi, I'm Ana (C-1001). What's the status of order 5002?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5002'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5002\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77002\", \"final_sale\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Ana! Your order 5002 (Vortex Blender) has shipped and is on its way. It's traveling under tracking ID TRK-77002, and there's no delivery date recorded yet. If you'd like, I can check with our shipping team for an estimated arrival.\n\nIs there anything else I can help you with today?"
+  }
+]

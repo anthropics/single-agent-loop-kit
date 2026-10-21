@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "Please change my shipping address to 12 Harbor Rd, Portland, ME 04101. I'm C-1002."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': 'Customer ID C-1002 requests a change of their shipping address on file to: 12 Harbor Rd, Portland, ME 04101. Please update the default shipping address for this account and confirm the update was applied, plus note whether the change affects any orders that have already shipped (those may still go to the previous address). Do not include the full address text in your summary \u2014 just confirm the city/state/ZIP so we can verify with the customer without exposing the full address in writing.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002'}",
+    "name": "account.get_account"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"customer_id\": \"C-1002\", \"name\": \"Deshawn Lee\", \"email\": \"deshawn@example.com\", \"shipping_address\": \"9 Elm Ct, Portland, ME 04102\", \"marketing_opt_in\": true}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1002', 'address': '12 Harbor Rd, Portland, ME 04101'}",
+    "name": "account.update_shipping_address"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"shipping_address\": \"12 Harbor Rd, Portland, ME 04101\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Default shipping address for C-1002 (Deshawn Lee) is updated to the new address in Portland, ME 04101; it applies to future orders only, so anything already shipped will still go to the previous address."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Deshawn \u2014 all set! Your default shipping address is now updated to the new Portland, ME 04101 address. One thing to note: the change applies to future orders only, so anything that has already shipped will still arrive at your previous address.\n\nIs there anything else I can help you with today?"
+  }
+]

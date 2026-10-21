@@ -1,0 +1,19 @@
+[
+  {
+    "role": "user",
+    "content": "Has order 5006 shipped yet?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5006'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5006\", \"customer_id\": \"C-1002\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"processing\", \"delivered_on\": null, \"tracking_id\": null, \"final_sale\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "Order 5006 (Arc Kettle) hasn't shipped yet \u2014 it's still in processing, so there's no tracking number assigned to it yet. Once it leaves the warehouse, a tracking id will be generated and I can give you a delivery estimate then.\n\nIs there anything else I can help you with today?"
+  }
+]

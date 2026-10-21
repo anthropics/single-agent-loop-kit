@@ -1,0 +1,64 @@
+[
+  {
+    "role": "user",
+    "content": "I want to return the kettle from order 5001. It's too small for us."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'returns', 'brief': 'Customer wants to return a kettle from order 5001. Reason: too small for their needs (sizing/fit, not damaged or defective). Please confirm the kettle on order 5001 is within the return window, start the return, and provide the next steps (return label, packaging instructions, where to drop off, and expected refund timing/method). No damage reported, so this is a standard change-of-mind return.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": true, \"days_left\": 19}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001', 'reason': 'too_small'}",
+    "name": "returns.create_return"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"rma_id\": \"RMA-5001\", \"label\": \"https://returns.example.com/RMA-5001.pdf\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "All set \u2014 your return is officially on its way to being wrapped up! \ud83c\udf89\n\n**Order details**\n- Item: Arc Kettle (SKU-KETTLE-2), Order 5001\n- Delivered: 2026-09-20 \u2014 well within the 30-day return window, with **19 days left** to ship it back\n- Not a final sale item, so you're good to go\n\n**Your return**\n- **RMA ID:** RMA-5001\n- **Prepaid return label:** https://returns.example.com/RMA-5001.pdf\n- Reason on file: too small for your needs (no damage reported)\n\n**Next steps**\n1. **Print the label** from the link above and have your RMA ID (RMA-5001) handy.\n2. **Pack it up:** Place the kettle in its original box if you still have it, along with any accessories and inserts that came with it. Cushion it with paper or bubble wrap so nothing rattles around, then seal the outer carton securely.\n3. **Attach the label:** Tape the prepaid label flat on the largest surface and cover or remove any old shipping labels or barcodes so it doesn't get misrouted.\n4. **Drop it off:** Hand the package to the carrier printed on your prepaid label \u2014 at any of their retail or drop-off locations, or schedule a pickup through their site. Keep the drop-off receipt until your refund lands.\n\n**Refund timing and method**\nOnce the kettle arrives at our warehouse, inspection typically takes about 3\u20135 business days. Your refund then goes back to the original payment method used on order 5001, and most banks post it within 5\u20137 business days after we process it.\n\nAnything else I can help you with today? I'm always happy to pitch in!"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Please look up order 5001 and confirm the kettle line item: product name/size, quantity, price paid, order date, and delivery date. This is to support a change-of-mind return request (item too small). Also include the customer's first name if available. Do not include the full shipping address in your summary.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5001 is for an Arc Kettle (SKU-KETTLE-2), status delivered, tracking TRK-77001 \u2014 it is not a final sale item. My order record doesn't include size, quantity, price paid, order date, or customer name, so you'd need the billing/customer team for those details."
+  },
+  {
+    "role": "assistant",
+    "content": "Good news \u2014 your return is all set!\n\n**Arc Kettle (SKU-KETTLE-2), Order 5001**\n- Delivered 2026-09-20, so you're comfortably inside the 30-day window \u2014 **19 days left** to ship it back\n- Reason on file: too small for your needs\n- **RMA ID:** RMA-5001\n- **Prepaid label:** https://returns.example.com/RMA-5001.pdf\n\n**Next steps**\n1. Print the label and keep your RMA ID handy.\n2. Pack the kettle in its original box if you have it, with any accessories and inserts, cushioned so nothing rattles.\n3. Tape the label flat on the largest surface and cover any old labels or barcodes.\n4. Drop it with the carrier shown on the label, or schedule a pickup. Hold onto your receipt until the refund lands.\n\n**Refund:** Inspection takes about 3\u20135 business days after it reaches our warehouse, then the refund goes back to your original payment method \u2014 most banks post it within 5\u20137 business days after that.\n\nIs there anything else I can help you with today?"
+  }
+]

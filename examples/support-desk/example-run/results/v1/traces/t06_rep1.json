@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "Can I send back the filter pack from order 5008? We never opened it."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'name': 'returns'}",
+    "name": "router.load_skill"
+  },
+  {
+    "role": "tool_result",
+    "content": "---\nname: returns\ndescription: Returning or sending back an item from an order, and questions about whether an order can be returned. Load before checking eligibility or creating a return.\n---\n\n# Returns\n\nA good result: an eligible order gets a return created and the customer gets the RMA id and\nthe label link. An ineligible order gets no return and a plain explanation of which rule\napplies.\n\n## How to do it\n\n1. If the customer names the item but not the order, find the order with `get_order` first.\n2. Call `check_return_eligibility` before you tell the customer anything about whether the\n   return can happen. The answer depends on dates and order flags you cannot see otherwise.\n3. If it is eligible, call `create_return` with the closest reason. Pick `other` when none\n   fits rather than guessing.\n4. Give the customer the RMA id and the label link from the result.\n\n## Rules and why\n\nThese are enforced in `create_return`. They are listed here so you can explain an outcome.\n\n- Items can be returned within 30 days of delivery.\n- Final sale items can never be returned.\n- An order that has not been delivered cannot be returned yet.\n\nIf the order is not eligible, say which rule applies and do not offer an exception. Nobody\nin this conversation can grant one.\n"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5008'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5008\", \"customer_id\": \"C-1004\", \"sku\": \"SKU-FILTER-3\", \"item\": \"Vacuum Filter 3-pack\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-15\", \"tracking_id\": \"TRK-77008\", \"final_sale\": true}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5008'}",
+    "name": "router.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": false, \"reason\": \"Final sale items cannot be returned.\"}"
+  },
+  {
+    "role": "assistant",
+    "content": "Thanks for checking in on this. I looked up order 5008 \u2014 the Vacuum Filter 3-pack, delivered September 15 \u2014 and unfortunately it can't be returned. It was sold as a final sale item, and final sale items aren't eligible for return, even unopened. That rule doesn't have an exception process, so I don't want to leave you waiting on one.\n\nI'm sorry that isn't better news. If the filters turn out not to fit your vacuum, I'm happy to have someone help you confirm the right model for next time.\n\nIs there anything else I can help you with today?"
+  }
+]

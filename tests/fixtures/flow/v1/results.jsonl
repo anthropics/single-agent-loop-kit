@@ -1,0 +1,6 @@
+{"prompt_id": "t01", "rep": 0, "tags": ["orders"], "status": "ok", "grade": {"task_complete": 1}, "latency_s": 10, "in_tokens": 4000, "out_tokens": 200, "model_calls": 3, "model": "model-x"}
+{"prompt_id": "t02", "rep": 0, "tags": ["orders"], "status": "ok", "grade": {"task_complete": 1}, "latency_s": 12, "in_tokens": 5000, "out_tokens": 300, "model_calls": 3, "model": "model-x"}
+{"prompt_id": "t03", "rep": 0, "tags": ["returns"], "status": "ok", "grade": {"task_complete": 1}, "latency_s": 8, "in_tokens": 3000, "out_tokens": 100, "model_calls": 2, "model": "model-x"}
+{"prompt_id": "t04", "rep": 0, "tags": ["returns"], "status": "ok", "grade": {"task_complete": 1}, "latency_s": 10, "in_tokens": 4000, "out_tokens": 200, "model_calls": 3, "model": "model-x"}
+{"prompt_id": "t05", "rep": 0, "tags": ["returns"], "status": "ok", "grade": {"task_complete": 1}, "latency_s": 9, "in_tokens": 100, "out_tokens": 100, "model_calls": 1, "model": "model-x"}
+{"prompt_id": "t04", "rep": 1, "tags": ["returns"], "status": "truncated", "grade": {"task_complete": 0}, "latency_s": 1, "in_tokens": 1, "out_tokens": 1, "model_calls": 1, "model": "model-x"}

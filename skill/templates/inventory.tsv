@@ -1,0 +1,3 @@
+agent	owner	prompt	tools	invoked_by	returns	talks_to_user	context_read	traffic	chains_with	evals	verdict	evidence	confidence
+example_agent	payments team	prompts/example.md (~600 tokens)	3: get_x, check_x, create_x	tool_call	free_text	no	~400 tokens per call	18% of traces	none	evals/example.jsonl	fold	prompts/example.md:4-12 is a procedure over three API calls; no large reads	high
+example_router	platform team (inferred)	prompts/router.md (~900 tokens)	1: delegate	entry	free_text	yes	~1,500 tokens per call	100% of traces	all	evals/golden.jsonl (all tasks)	main	prompts/router.md:1-30 routes every request; becomes the single loop	high

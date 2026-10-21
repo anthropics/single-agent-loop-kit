@@ -1,0 +1,13 @@
+{"trace_id": "a", "ts": "2026-09-01T10:00:00Z", "agent": "router", "duration_ms": 500}
+{"trace_id": "a", "ts": "2026-09-01T10:00:01Z", "agent": "orders", "duration_ms": 1000, "input_tokens": 900}
+{"trace_id": "a", "ts": "2026-09-01T10:00:03Z", "agent": "shipping", "duration_ms": 2000, "input_tokens": 800}
+{"trace_id": "b", "ts": "2026-09-01T10:05:03Z", "agent": "shipping", "duration_ms": 2000, "input_tokens": 800}
+{"trace_id": "b", "ts": "2026-09-01T10:05:01Z", "agent": "orders", "duration_ms": 1000, "input_tokens": 900}
+{"trace_id": "c", "ts": "2026-09-01T10:09:00Z", "agent": "returns", "duration_ms": 4000, "input_tokens": 2600}
+{"trace_id": "d", "ts": "2026-09-01T10:12:00Z", "agent": "orders", "duration_ms": 1000, "input_tokens": 900}
+
+{"trace_id": "e", "ts": "2026-09-01T10:15:00Z", "agent": "account", "duration_ms": 2000, "input_tokens": 1100}
+{"trace_id": "e", "ts": "2026-09-01T10:15:04Z", "agent": "returns", "duration_ms": 4000, "input_tokens": 2600}
+{"trace_id": "f", "ts": "2026-09-01T10:20:00Z", "agent": "account", "duration_ms": 2000, "input_tokens": 1100}
+{"trace_id": "g", "ts": "2026-09-01T10:25:00Z", "agent": "account", "duration_ms": 2000, "input_tokens": 1100}
+{"trace_id": "h", "ts": "2026-09-01T10:30:00Z", "agent": "returns", "duration_ms": 4000, "input_tokens": 2600}

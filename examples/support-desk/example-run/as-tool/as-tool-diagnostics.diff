@@ -1,0 +1,353 @@
+diff --git a/app/orchestrator.py b/app/orchestrator.py
+index ab29804..7d6a75e 100644
+--- a/app/orchestrator.py
++++ b/app/orchestrator.py
+@@ -3,11 +3,14 @@ specialist subagent, or hands the whole conversation to claims."""
+ 
+ from __future__ import annotations
+ 
++import json
++
+ from .backend import Backend
+ from .llm import Meter, create, get_client, text_of, tool_uses
+-from .subagents import MAX_TURNS, ClaimsSession, Runtime, load_prompt, run_subagent
++from .subagents import MAX_TURNS, ClaimsSession, Runtime, load_prompt, run_subagent, run_subagent_as_tool
+ 
+-DELEGATES = ["orders", "shipping", "returns", "account", "diagnostics"]
++# diagnostics is no longer offered here: the router reaches it through diagnose_device.
++DELEGATES = ["orders", "shipping", "returns", "account"]
+ 
+ ROUTER_TOOLS = [
+     {
+@@ -22,6 +25,28 @@ ROUTER_TOOLS = [
+             "required": ["agent", "brief"],
+         },
+     },
++    {
++        "name": "diagnose_device",
++        "description": (
++            "Diagnose a fault on a customer's device from its device log. Use it for any question "
++            "about a device that stops, shows an error or misbehaves. It needs the serial number: "
++            "if the customer has not given one, ask them for it instead of calling this. Returns "
++            "a JSON result with the conclusion, the evidence it rests on, a confidence level and "
++            "caveats. Check that the conclusion follows from the evidence, and carry any caveats "
++            "into what you tell the customer."
++        ),
++        "input_schema": {
++            "type": "object",
++            "properties": {
++                "serial": {"type": "string",
++                           "description": "The device serial number exactly as the customer gave it, "
++                                          "for example SN-VAC-3391."},
++                "question": {"type": "string",
++                             "description": "What the customer reports and wants to know."},
++            },
++            "required": ["serial", "question"],
++        },
++    },
+     {
+         "name": "handoff_to_claims",
+         "description": "Hand the conversation to the claims specialist for shipping damage.",
+@@ -34,6 +59,17 @@ ROUTER_TOOLS = [
+ ]
+ 
+ 
++def diagnose_device(rt: Runtime, args: dict) -> str:
++    """The diagnostics subagent, called as a tool: required fields in, one checked result out."""
++    serial = str(args.get("serial") or "").strip()
++    if not serial:
++        return json.dumps({"error": "diagnose_device needs the device serial number (it looks like "
++                                    "SN-VAC-3391). Ask the customer for it, then call again."})
++    question = str(args.get("question") or "").strip() or "Find out what is wrong with the device."
++    brief = f"Device serial number: {serial}\nWhat the customer reports: {question}"
++    return run_subagent_as_tool(rt, "diagnostics", brief)
++
++
+ class Conversation:
+     """One customer conversation. Call send() once per customer message."""
+ 
+@@ -76,6 +112,8 @@ class Conversation:
+                 self.rt.log("tool_call", str(call.input), name=f"router.{call.name}")
+                 if call.name == "delegate":
+                     output = run_subagent(self.rt, call.input["agent"], call.input["brief"])
++                elif call.name == "diagnose_device":
++                    output = diagnose_device(self.rt, call.input)
+                 else:
+                     handoff_summary = call.input.get("summary", "")
+                     output = "Conversation handed to the claims specialist."
+diff --git a/app/prompts/router.md b/app/prompts/router.md
+index 39d388f..fa11fc6 100644
+--- a/app/prompts/router.md
++++ b/app/prompts/router.md
+@@ -8,18 +8,22 @@ Specialists you can delegate to:
+ - shipping: tracks shipments. Needs a tracking id.
+ - returns: handles returns.
+ - account: account changes.
+-- diagnostics: device troubleshooting.
+ 
+ For shipping damage, hand the conversation to claims with handoff_to_claims. The claims
+ specialist talks to the customer directly until the claim is opened.
+ 
++For device troubleshooting, call diagnose_device with the device's serial number. If the
++customer has not given a serial number, ask them for it. The tool returns a result for you
++to read, not a reply to pass on.
++
+ Rules added by teams:
+ - [orders team] Always call orders before shipping so shipping has a tracking id.
+ - [shipping team] If the customer asks about delivery timing, route to shipping first.
+ - [returns team] If the customer mentions a return, route to returns even if they also ask about something else.
+ - [account team] Never reveal a customer's full address in a reply.
+-- [diagnostics team] Device questions go to diagnostics. Do not guess at error codes.
++- [diagnostics team] Device questions go to diagnose_device. Do not guess at error codes.
+ - [brand] Be warm and concise. Use the customer's first name if you know it.
+ - [brand, 2024] Always end with "Is there anything else I can help you with today?"
+ 
+-When the specialists have replied, write the final reply to the customer from their summaries.
++When the specialists have replied, write the final reply to the customer from their summaries
++and results.
+diff --git a/app/prompts/subagent_response.md b/app/prompts/subagent_response.md
+new file mode 100644
+index 0000000..6202a3e
+--- /dev/null
++++ b/app/prompts/subagent_response.md
+@@ -0,0 +1,17 @@
++You are being called as a tool by Tamberwick Home's main support agent. You never speak to
++the customer: the main agent reads your result and writes the reply. Do not greet, sign off
++or address the customer.
++
++Reply with one JSON object and nothing else: no prose around it and no code fence. It has
++exactly these fields:
++
++- "conclusion": a string. The answer to the brief, in a few sentences the main agent can act on.
++- "evidence": a list of strings. The data the conclusion rests on: ids, codes, values, counts.
++  Specific enough for the main agent to check the conclusion against.
++- "actions_taken": a list of strings. Anything you changed. Empty if you only read.
++- "confidence": "high", "medium" or "low".
++- "caveats": a list of strings. What you could not check, or what would change the conclusion.
++  Empty if there is nothing.
++
++If you could not do the job (an id that does not exist, a tool error), say so in the
++conclusion, set confidence to "low" and give the reason in caveats.
+diff --git a/app/subagent_response.schema.json b/app/subagent_response.schema.json
+new file mode 100644
+index 0000000..1c65faa
+--- /dev/null
++++ b/app/subagent_response.schema.json
+@@ -0,0 +1,33 @@
++{
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "title": "SubagentResponse",
++  "description": "What every subagent called as a tool hands back to the main agent. UI events travel on a separate channel.",
++  "type": "object",
++  "additionalProperties": false,
++  "required": ["conclusion", "evidence", "actions_taken", "confidence", "caveats"],
++  "properties": {
++    "conclusion": {
++      "type": "string",
++      "description": "The answer to the brief, in a few sentences the main agent can act on."
++    },
++    "evidence": {
++      "type": "array",
++      "items": {"type": "string"},
++      "description": "The data the conclusion rests on: ids, values, counts. Specific enough for the main agent to check."
++    },
++    "actions_taken": {
++      "type": "array",
++      "items": {"type": "string"},
++      "description": "Anything the subagent changed. Empty if it only read."
++    },
++    "confidence": {
++      "type": "string",
++      "enum": ["high", "medium", "low"]
++    },
++    "caveats": {
++      "type": "array",
++      "items": {"type": "string"},
++      "description": "What it could not check, or what would change the conclusion."
++    }
++  }
++}
+diff --git a/app/subagents.py b/app/subagents.py
+index a548467..de8d8b0 100644
+--- a/app/subagents.py
++++ b/app/subagents.py
+@@ -12,6 +12,7 @@ from .llm import Meter, create, text_of, tool_uses
+ from .tools import TOOLS_BY_AGENT, call_tool
+ 
+ PROMPTS = Path(__file__).parent / "prompts"
++RESPONSE_SCHEMA = json.loads((Path(__file__).parent / "subagent_response.schema.json").read_text())
+ MAX_TURNS = 8
+ 
+ 
+@@ -60,6 +61,58 @@ def run_subagent(rt: Runtime, name: str, brief: str, system: str | None = None)
+     return f"The {name} specialist ran out of turns."
+ 
+ 
++def response_problems(result) -> list[str]:
++    """Why a subagent's result does not fit the response schema. Empty when it fits."""
++    if not isinstance(result, dict):
++        return ["not a JSON object"]
++    fields = RESPONSE_SCHEMA["properties"]
++    problems = [f"missing {key}" for key in RESPONSE_SCHEMA["required"] if key not in result]
++    problems += [f"unexpected {key}" for key in result if key not in fields]
++    for key, spec in fields.items():
++        if key not in result:
++            continue
++        value = result[key]
++        if spec["type"] == "array":
++            fits = isinstance(value, list) and all(isinstance(item, str) for item in value)
++        else:
++            fits = isinstance(value, str) and value in spec.get("enum", [value])
++        if not fits:
++            problems.append(f"bad {key}")
++    if isinstance(result.get("conclusion"), str) and not result["conclusion"].strip():
++        problems.append("empty conclusion")
++    return problems
++
++
++def _json_object(text: str):
++    start, end = text.find("{"), text.rfind("}")   # tolerates a code fence around the object
++    try:
++        return json.loads(text[start:end + 1])
++    except ValueError:
++        return None
++
++
++def run_subagent_as_tool(rt: Runtime, name: str, brief: str) -> str:
++    """Run one specialist in a fresh context and return its result as checked JSON."""
++    system = f"{load_prompt(name)}\n\n{load_prompt('subagent_response')}"
++    text = run_subagent(rt, name, brief, system=system)
++    result = _json_object(text)
++    problems = response_problems(result)
++    if not problems:
++        return json.dumps(result)
++    if not text.strip():
++        return json.dumps({"error": f"The {name} subagent returned nothing."})
++    # Keep what it said, but never as if it were a checked answer.
++    said = result.get("conclusion") if isinstance(result, dict) else None
++    return json.dumps({
++        "conclusion": said.strip() if isinstance(said, str) and said.strip() else text.strip(),
++        "evidence": [],
++        "actions_taken": [],
++        "confidence": "low",
++        "caveats": [f"The {name} result did not fit the agreed format ({'; '.join(problems)}), "
++                    "so it has not been checked. Treat it as unverified."],
++    })
++
++
+ class ClaimsSession:
+     """The claims specialist takes over the conversation and talks to the customer
+     directly until a claim is opened.
+diff --git a/tests/test_diagnose_device.py b/tests/test_diagnose_device.py
+new file mode 100644
+index 0000000..9bd5a64
+--- /dev/null
++++ b/tests/test_diagnose_device.py
+@@ -0,0 +1,107 @@
++"""diagnose_device with no model in the loop: the two failure paths, and the happy path
++end to end through the router with a scripted client.
++
++    python3 -m unittest discover tests
++"""
++
++from __future__ import annotations
++
++import json
++import sys
++import unittest
++from pathlib import Path
++from types import SimpleNamespace
++from unittest import mock
++
++sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
++
++from app.backend import Backend  # noqa: E402
++from app.llm import Meter  # noqa: E402
++from app.orchestrator import Conversation, diagnose_device  # noqa: E402
++from app.subagents import Runtime, response_problems  # noqa: E402
++
++GOOD = {"conclusion": "E42, a brush motor stall. Clear the brush roll and reseat it.",
++        "evidence": ["E42 on 5 ERR lines", "lookup_error_code(E42): Brush motor stall"],
++        "actions_taken": [], "confidence": "high", "caveats": []}
++
++
++def _text(text):
++    return SimpleNamespace(content=[SimpleNamespace(type="text", text=text)], stop_reason="end_turn",
++                           usage=SimpleNamespace(input_tokens=1, output_tokens=1))
++
++
++def _use(name, args):
++    block = SimpleNamespace(type="tool_use", id=f"toolu_{name}", name=name, input=args)
++    return SimpleNamespace(content=[block], stop_reason="tool_use",
++                           usage=SimpleNamespace(input_tokens=1, output_tokens=1))
++
++
++class Scripted:
++    """Hands back the given responses in order and keeps every request it was sent."""
++
++    def __init__(self, *responses):
++        self.messages, self.responses, self.requests = self, list(responses), []
++
++    def create(self, **request):
++        self.requests.append(request)
++        return self.responses.pop(0)
++
++
++def _runtime(*responses):
++    return Runtime(Backend(), Meter(), Scripted(*responses))
++
++
++@mock.patch.dict("os.environ", {"KIT_MODEL": "fake"})
++class DiagnoseDevice(unittest.TestCase):
++    def test_missing_serial_is_refused_before_any_model_call(self):
++        for args in ({"question": "It blinks red."}, {"serial": "  ", "question": "It blinks red."}):
++            rt = _runtime()
++            result = json.loads(diagnose_device(rt, args))
++            self.assertIn("serial number", result["error"])
++            self.assertEqual(rt.client.requests, [])
++
++    def test_result_that_does_not_fit_comes_back_flagged(self):
++        missing_field = {k: v for k, v in GOOD.items() if k != "caveats"}
++        for reply in ("It is E42. Clean the brush roll.", json.dumps(missing_field),
++                      json.dumps({**GOOD, "confidence": "certain"}), json.dumps({**GOOD, "extra": 1})):
++            result = json.loads(diagnose_device(_runtime(_text(reply)), {"serial": "SN-VAC-3391", "question": "?"}))
++            self.assertEqual(response_problems(result), [])
++            self.assertEqual(result["confidence"], "low")
++            self.assertIn("did not fit the agreed format", result["caveats"][0])
++
++    def test_empty_result_is_an_error(self):
++        result = json.loads(diagnose_device(_runtime(_text("")), {"serial": "SN-VAC-3391", "question": "?"}))
++        self.assertIn("returned nothing", result["error"])
++
++    def test_fitting_result_passes_through_and_the_brief_carries_the_serial(self):
++        rt = _runtime(_text("```json\n" + json.dumps(GOOD) + "\n```"))
++        result = json.loads(diagnose_device(rt, {"serial": "SN-VAC-3391", "question": "It stops and blinks red."}))
++        self.assertEqual(result, GOOD)
++        request = rt.client.requests[0]
++        self.assertIn("SN-VAC-3391", request["messages"][0]["content"])
++        self.assertIn("It stops and blinks red.", request["messages"][0]["content"])
++        self.assertIn('"conclusion"', request["system"])
++        self.assertEqual({t["name"] for t in request["tools"]}, {"fetch_device_logs", "lookup_error_code"})
++
++    def test_router_reaches_diagnostics_through_the_tool(self):
++        client = Scripted(
++            _use("diagnose_device", {"serial": "SN-VAC-3391", "question": "Stops and blinks red."}),  # router
++            _use("fetch_device_logs", {"serial": "SN-VAC-3391"}),                                     # diagnostics
++            _use("lookup_error_code", {"code": "E42"}),
++            _text(json.dumps(GOOD)),
++            _text("It is error E42. Clear the brush roll."),                                          # router
++        )
++        conversation = Conversation(Backend(), Meter(), client)
++        reply = conversation.send("My vacuum SN-VAC-3391 stops and blinks red.")
++        self.assertEqual(reply, "It is error E42. Clear the brush roll.")
++        self.assertEqual(conversation.rt.meter.by_agent["diagnostics"]["calls"], 3)
++        results = [m for m in client.requests[-1]["messages"] if m["role"] == "user" and isinstance(m["content"], list)]
++        handed_back = results[-1]["content"][0]["content"]
++        self.assertEqual(json.loads(handed_back), GOOD)
++        self.assertNotIn("INFO", handed_back)   # the log stays in the subagent's context
++        delegate = next(t for t in client.requests[0]["tools"] if t["name"] == "delegate")
++        self.assertNotIn("diagnostics", delegate["input_schema"]["properties"]["agent"]["enum"])
++
++
++if __name__ == "__main__":
++    unittest.main()

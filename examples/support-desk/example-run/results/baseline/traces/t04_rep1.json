@@ -1,0 +1,64 @@
+[
+  {
+    "role": "user",
+    "content": "I want to return the kettle from order 5001. It's too small for us."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'returns', 'brief': 'Customer wants to return a kettle from order 5001. Reason: too small for their needs (not damaged, not defective). Please confirm return eligibility for that item, the return window status, and the exact next steps the customer needs to take (label, packaging, drop-off vs pickup, and expected refund method/timing). No shipping damage involved.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "returns.check_return_eligibility"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"eligible\": true, \"days_left\": 19}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001', 'reason': 'too_small'}",
+    "name": "returns.create_return"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"rma_id\": \"RMA-5001\", \"label\": \"https://returns.example.com/RMA-5001.pdf\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Hooray \u2014 your return is all set! Here are the details:\n\n**Order & Item**\n- Order 5001 \u2014 Arc Kettle (SKU-KETTLE-2)\n- Status: Delivered on 2026-09-20\n- Final sale: No \ud83c\udf89\n\n**Eligibility & Return Window**\n- \u2705 Eligible for return\n- You have **19 days left** in your 30-day return window, so there's no rush \u2014 but sooner is always sunnier!\n\n**Your Return Info**\n- RMA ID: **RMA-5001**\n- Prepaid label: https://returns.example.com/RMA-5001.pdf\n\n**Next Steps**\n1. Print the prepaid label from the link above.\n2. Pack the kettle up securely \u2014 original box if you still have it, otherwise any sturdy box with a little padding works great.\n3. Write or include the RMA ID (RMA-5001) with the package so our warehouse team can match it up quickly.\n4. Affix the prepaid label to the outside of the box, covering any old shipping labels.\n5. Drop it off with the carrier shown on the label.\n\nA note on the details I can't confirm: I don't have access to pickup scheduling options or refund processing specifics on my end, so I can't promise a particular refund method or timeline. Typically refunds go back to the original payment method, but please check your order confirmation email or Tamberwick Home's returns page for the official refund timing \u2014 I don't want to guess on your money! If you'd prefer a carrier pickup instead of a drop-off, the carrier listed on your label can tell you whether that's available in your area.\n\nThanks so much for shopping with Tamberwick Home \u2014 happy to help you find a roomier kettle anytime! \u2728"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'orders', 'brief': \"Look up order 5001. Need: customer first name, the kettle line item (product name/variant/size, quantity, price paid), order and delivery dates, and whether the order is in a state that allows a return. Context: customer wants to return the kettle because it's too small.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5001'}",
+    "name": "orders.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5001\", \"customer_id\": \"C-1001\", \"sku\": \"SKU-KETTLE-2\", \"item\": \"Arc Kettle\", \"status\": \"delivered\", \"delivered_on\": \"2026-09-20\", \"tracking_id\": \"TRK-77001\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Order 5001 is an Arc Kettle (SKU-KETTLE-2), status delivered, tracking ID TRK-77001; it's not marked final sale, so it isn't return-blocked on that basis. I don't have the customer's first name, variant/size, quantity, price paid, or order date in my records, and return eligibility windows aren't something I can confirm \u2014 you'd need the returns team for that."
+  },
+  {
+    "role": "assistant",
+    "content": "Good news \u2014 your return for the Arc Kettle is all set up.\n\n**Return details (Order 5001 \u2014 Arc Kettle, SKU-KETTLE-2)**\n- Eligible for return, and it's not a final sale item\n- Delivered 2026-09-20, with **19 days left** in your 30-day return window\n- **RMA ID: RMA-5001**\n- Prepaid label: https://returns.example.com/RMA-5001.pdf\n\n**What to do next**\n1. Print the prepaid label from the link above.\n2. Pack the kettle securely \u2014 the original box if you have it, otherwise any sturdy box with a bit of padding.\n3. Include or write the RMA ID (RMA-5001) with the package so our warehouse can match it quickly.\n4. Affix the label to the outside, covering any old shipping labels.\n5. Drop it off with the carrier shown on the label.\n\nTwo things I don't want to guess on: refunds typically go back to your original payment method, but I can't confirm the exact method or timing \u2014 your order confirmation email or our returns page will have the official details. And if you'd rather have the package picked up than drop it off, the carrier listed on your label can tell you whether pickup is available in your area.\n\nIs there anything else I can help you with today?"
+  }
+]

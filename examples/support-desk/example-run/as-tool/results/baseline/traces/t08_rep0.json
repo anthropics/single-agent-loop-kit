@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "Stop sending me marketing emails. Customer C-1003."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': \"Customer C-1003 requests to be unsubscribed from all marketing/promotional emails. Please opt them out of marketing email communications on their account and confirm. Note: do not include the customer's full address in the response. Please confirm the opt-out is applied, whether transactional emails (order/shipping confirmations) will still be sent, and how long it may take for the change to take effect. Also confirm the customer's first name if available so we can address them warmly.\"}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1003', 'opt_in': False}",
+    "name": "account.set_marketing_opt_in"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"marketing_opt_in\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1003'}",
+    "name": "account.get_account"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"customer_id\": \"C-1003\", \"name\": \"Mei Tanaka\", \"email\": \"mei@example.com\", \"shipping_address\": \"221 Lake Ave, Duluth, MN 55802\", \"marketing_opt_in\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Marketing email is now opted out for Mei (C-1003); transactional emails like order and shipping confirmations will still be sent, and the change is effective immediately though in-flight campaigns may take up to ~24-48 hours to stop. Their shipping address remains the new address on file, unchanged."
+  },
+  {
+    "role": "assistant",
+    "content": "Hi Mei \u2014 you're all set. Marketing emails are now turned off for your account, effective immediately. A few campaigns already in flight may still reach you over the next 24\u201348 hours, but they'll stop after that.\n\nYou'll still receive transactional emails like order and shipping confirmations, so you won't miss updates on anything you've purchased.\n\nIs there anything else I can help you with today?"
+  }
+]

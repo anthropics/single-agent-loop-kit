@@ -1,0 +1,28 @@
+[
+  {
+    "role": "user",
+    "content": "Stop sending me marketing emails. Customer C-1003."
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'account', 'brief': 'Customer C-1003 requests to be unsubscribed from all marketing emails. Please opt them out of marketing/promotional email communications on their account (keep transactional emails like order and shipping confirmations active). Confirm when the preference change is applied and note how long it may take to take effect.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'customer_id': 'C-1003', 'opt_in': False}",
+    "name": "account.set_marketing_opt_in"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"ok\": true, \"marketing_opt_in\": false}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Marketing/promotional email is now switched off for C-1003 \u2014 transactional emails (order and shipping confirmations) remain active, and the change may take up to 24\u201348 hours to fully take effect across already-queued campaigns."
+  },
+  {
+    "role": "assistant",
+    "content": "You're all set \u2014 marketing and promotional emails have been switched off for your account. You'll still get transactional emails like order and shipping confirmations, and please allow 24\u201348 hours for any already-queued campaigns to clear out.\n\nIs there anything else I can help you with today?"
+  }
+]

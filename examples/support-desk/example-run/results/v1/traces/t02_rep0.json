@@ -1,0 +1,37 @@
+[
+  {
+    "role": "user",
+    "content": "Where is order 5007 and when will it arrive?"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'order_id': '5007'}",
+    "name": "router.get_order"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"order_id\": \"5007\", \"customer_id\": \"C-1003\", \"sku\": \"SKU-BLEND-9\", \"item\": \"Vortex Blender\", \"status\": \"shipped\", \"delivered_on\": null, \"tracking_id\": \"TRK-77007\", \"final_sale\": false}"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'agent': 'shipping', 'brief': 'Customer asks where order 5007 is and when it will arrive. Order 5007: Vortex Blender (SKU-BLEND-9), status \"shipped\", not yet delivered, tracking id TRK-77007. Please provide current shipment location/status and the estimated delivery date. Do not include the customer\\'s full street address in the response.'}",
+    "name": "router.delegate"
+  },
+  {
+    "role": "tool_call",
+    "content": "{'tracking_id': 'TRK-77007'}",
+    "name": "shipping.get_tracking"
+  },
+  {
+    "role": "tool_result",
+    "content": "{\"tracking_id\": \"TRK-77007\", \"carrier\": \"Bluebird\", \"state\": \"delayed\", \"eta\": \"2026-10-06\", \"last_event\": \"Weather delay at Minneapolis hub\"}"
+  },
+  {
+    "role": "tool_result",
+    "content": "Here's the current shipping status for order 5007 (Vortex Blender, SKU-BLEND-9):\n\n- **Carrier:** Bluebird\n- **Tracking ID:** TRK-77007\n- **Shipment state:** Delayed\n- **Estimated delivery:** October 6\n- **Last event:** Weather delay at Minneapolis hub\n\nThe package is in transit but currently held up by weather at Bluebird's Minneapolis hub. It has not been delivered yet, and the revised ETA is October 6. If the weather delay worsens, that date could shift again \u2014 worth checking the tracking again closer to the date."
+  },
+  {
+    "role": "assistant",
+    "content": "Your Vortex Blender (order 5007) is on its way with Bluebird under tracking **TRK-77007**.\n\nRight now it's marked as **delayed** \u2014 the last scan shows a weather hold at Bluebird's Minneapolis hub. The revised estimated delivery is **October 6**. Since the delay is weather-related, that date could shift slightly, so it's worth re-checking the tracking closer to the day.\n\nIs there anything else I can help you with today?"
+  }
+]
